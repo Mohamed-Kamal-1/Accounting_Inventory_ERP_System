@@ -2,9 +2,8 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 
-import '../../domain/entities/inventory_transaction_entity.dart';
-import '../../domain/entities/salesman_custody_entity.dart';
 import '../../domain/repositories/inventory_repository.dart';
+import 'custody_state.dart';
 
 // --- States ---
 abstract class CustodyState extends Equatable {
@@ -15,28 +14,6 @@ abstract class CustodyState extends Equatable {
 
 class CustodyInitial extends CustodyState {}
 
-class CustodyLoading extends CustodyState {}
-
-class CustodyLoaded extends CustodyState {
-  final List<InventoryTransactionEntity> transactions;
-  final List<SalesmanCustodyEntity> currentCustody;
-
-  const CustodyLoaded(
-      {required this.transactions, required this.currentCustody});
-
-  @override
-  List<Object?> get props => [transactions, currentCustody];
-}
-
-class CustodyError extends CustodyState {
-  final String message;
-  const CustodyError(this.message);
-
-  @override
-  List<Object?> get props => [message];
-}
-
-// --- Cubit ---
 @injectable
 class CustodyCubit extends Cubit<CustodyState> {
   final InventoryRepository _repository;

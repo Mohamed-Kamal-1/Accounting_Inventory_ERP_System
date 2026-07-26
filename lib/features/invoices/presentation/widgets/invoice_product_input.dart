@@ -4,7 +4,7 @@
 // import '../../../../core/app_text/invoices_text/invoices_strings.dart';
 // import '../../../../core/dimensions/Dimension_app.dart';
 // import '../../../inventory/domain/entities/product_entity.dart';
-// import '../../../inventory/presentation/cubit/inventory_cubit.dart';
+// import '../../../inventory/presentation/cubit/custody_cubit.dart';
 // import '../../../inventory/presentation/cubit/inventory_state.dart';
 //
 // class InvoiceProductInput extends StatelessWidget {

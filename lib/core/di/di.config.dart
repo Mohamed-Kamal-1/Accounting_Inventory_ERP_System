@@ -13,14 +13,8 @@ import 'package:get_it/get_it.dart' as _i174;
 import 'package:injectable/injectable.dart' as _i526;
 import 'package:supabase_flutter/supabase_flutter.dart' as _i454;
 
-import '../../features/accounts/data/datasources/accounts_local_datasource.dart'
-    as _i964;
 import '../../features/accounts/data/datasources/accounts_remote_datasource.dart'
     as _i940;
-import '../../features/accounts/data/repositories_implementation/accounts_local_datasource.dart'
-    as _i223;
-import '../../features/accounts/data/repositories_implementation/accounts_repository_impl.dart'
-    as _i640;
 import '../../features/accounts/domain/repositories/accounts_repository.dart'
     as _i581;
 import '../../features/accounts/domain/usecases/add_account_usecase.dart'
@@ -74,7 +68,6 @@ import '../../features/inventory/presentation/bloc/inventory_bloc.dart'
     as _i690;
 import '../../features/inventory/presentation/cubit/custody_cubit.dart'
     as _i115;
-import '../../features/inventory/presentation/cubit/sales_cubit.dart' as _i911;
 import '../../features/inventory/presentation/view_model/cubit/inventory_cubit.dart'
     as _i232;
 import '../../features/invoices/data/datasources/invoices_remote_datasource.dart'
@@ -86,8 +79,6 @@ import '../../features/invoices/domain/repositories/invoices_repository.dart'
 import '../../features/invoices/domain/usecases/create_invoice_usecase.dart'
     as _i920;
 import '../../features/invoices/presentation/cubit/nvoices_cubit.dart' as _i672;
-import '../../features/purchases/presentation/view_model/cubit/purchase_invoice_cubit/purchase_invoice_cubit.dart'
-    as _i421;
 import '../../features/reports_and_dashboard/data/datasources/reports_remote_datasource.dart'
     as _i991;
 import '../../features/reports_and_dashboard/data/repositories/reports_repository_impl.dart'
@@ -106,7 +97,6 @@ import '../../features/sales/domain/repositories/sales_repository.dart'
     as _i434;
 import '../../features/sales/presentation/view_model/cubit/sales_cubit.dart'
     as _i228;
-import '../database/app_database.dart' as _i982;
 import 'module/register_module.dart' as _i209;
 
 extension GetItInjectableX on _i174.GetIt {
@@ -123,10 +113,15 @@ extension GetItInjectableX on _i174.GetIt {
     final registerModule = _$RegisterModule();
     gh.factory<_i126.InvoicesRemoteDataSource>(
         () => _i126.InvoicesRemoteDataSource());
-    gh.singleton<_i982.AppDatabase>(() => _i982.AppDatabase());
     gh.singleton<_i822.AccountService>(() => _i822.AccountService());
     gh.singleton<_i515.ProductService>(() => _i515.ProductService());
     gh.lazySingleton<_i454.SupabaseClient>(() => registerModule.supabaseClient);
+    gh.factory<_i313.AddAccountUseCase>(
+        () => _i313.AddAccountUseCase(gh<_i581.AccountsRepository>()));
+    gh.factory<_i1063.DeleteAccountUseCase>(
+        () => _i1063.DeleteAccountUseCase(gh<_i581.AccountsRepository>()));
+    gh.factory<_i663.SearchAccountsUseCase>(
+        () => _i663.SearchAccountsUseCase(gh<_i581.AccountsRepository>()));
     gh.factory<_i1019.SalesRemoteDataSource>(
         () => _i1019.SalesRemoteDataSourceImpl(gh<_i454.SupabaseClient>()));
     gh.singleton<_i940.AccountsRemoteDataSource>(
@@ -139,54 +134,38 @@ extension GetItInjectableX on _i174.GetIt {
         () => _i936.ContactsRemoteDataSourceImpl(gh<_i454.SupabaseClient>()));
     gh.factory<_i103.InventoryRemoteDataSource>(
         () => _i103.InventoryRemoteDataSource(gh<_i454.SupabaseClient>()));
-    gh.singleton<_i964.AccountsLocalDataSource>(
-        () => _i964.AccountsLocalDataSourceImpl(gh<_i982.AppDatabase>()));
     gh.singleton<_i337.InvoicesRepository>(() =>
         _i1008.InvoicesRepositoryImpl(gh<_i126.InvoicesRemoteDataSource>()));
     gh.factory<_i787.AuthRepository>(
         () => _i153.AuthRepositoryImpl(gh<_i586.AuthRemoteDataSourceImpl>()));
     gh.singleton<_i959.ReportsRepository>(
         () => _i471.ReportsRepositoryImpl(gh<_i991.ReportsRemoteDataSource>()));
+    gh.lazySingleton<_i297.GetAccountsUseCase>(
+        () => _i297.GetAccountsUseCase(gh<_i581.AccountsRepository>()));
     gh.factory<_i232.InventoryCubit>(
         () => _i232.InventoryCubit(gh<_i515.ProductService>()));
-    gh.factory<_i421.PurchaseInvoiceCubit>(
-        () => _i421.PurchaseInvoiceCubit(gh<_i515.ProductService>()));
-    gh.factory<_i228.SalesInvoiceCubit>(
-        () => _i228.SalesInvoiceCubit(gh<_i515.ProductService>()));
     gh.factory<_i188.LoginUseCase>(
         () => _i188.LoginUseCase(gh<_i787.AuthRepository>()));
     gh.factory<_i48.LogoutUseCase>(
         () => _i48.LogoutUseCase(gh<_i787.AuthRepository>()));
-    gh.factory<_i223.AccountsLocalDataSourceImpl>(
-        () => _i223.AccountsLocalDataSourceImpl(gh<_i982.AppDatabase>()));
     gh.factory<_i909.ContactsRepository>(() =>
         _i663.ContactsRepositoryImpl(gh<_i936.ContactsRemoteDataSourceImpl>()));
     gh.factory<_i434.SalesRepository>(
         () => _i735.SalesRepositoryImpl(gh<_i1019.SalesRemoteDataSource>()));
     gh.factory<_i920.CreateInvoiceUseCase>(
         () => _i920.CreateInvoiceUseCase(gh<_i337.InvoicesRepository>()));
-    gh.singleton<_i581.AccountsRepository>(() => _i640.AccountsRepositoryImpl(
-          gh<_i964.AccountsLocalDataSource>(),
-          gh<_i940.AccountsRemoteDataSource>(),
-        ));
-    gh.factory<_i313.AddAccountUseCase>(
-        () => _i313.AddAccountUseCase(gh<_i581.AccountsRepository>()));
-    gh.factory<_i1063.DeleteAccountUseCase>(
-        () => _i1063.DeleteAccountUseCase(gh<_i581.AccountsRepository>()));
-    gh.factory<_i663.SearchAccountsUseCase>(
-        () => _i663.SearchAccountsUseCase(gh<_i581.AccountsRepository>()));
     gh.factory<_i672.InvoicesCubit>(
         () => _i672.InvoicesCubit(gh<_i920.CreateInvoiceUseCase>()));
     gh.factory<_i1015.GetDashboardStatsUseCase>(
         () => _i1015.GetDashboardStatsUseCase(gh<_i959.ReportsRepository>()));
-    gh.factory<_i911.SalesCubit>(
-        () => _i911.SalesCubit(gh<_i434.SalesRepository>()));
     gh.factory<_i422.InventoryRepository>(() =>
         _i572.InventoryRepositoryImpl(gh<_i103.InventoryRemoteDataSource>()));
     gh.factory<_i117.AuthCubit>(() => _i117.AuthCubit(
           gh<_i188.LoginUseCase>(),
           gh<_i787.AuthRepository>(),
         ));
+    gh.factory<_i228.SalesCubit>(
+        () => _i228.SalesCubit(gh<_i422.InventoryRepository>()));
     gh.factory<_i115.CustodyCubit>(
         () => _i115.CustodyCubit(gh<_i422.InventoryRepository>()));
     gh.factory<_i431.GetCategoriesUseCase>(
@@ -211,8 +190,12 @@ extension GetItInjectableX on _i174.GetIt {
         () => _i1050.GetContactsUseCase(gh<_i909.ContactsRepository>()));
     gh.factory<_i103.UpdateContactUseCase>(
         () => _i103.UpdateContactUseCase(gh<_i909.ContactsRepository>()));
-    gh.lazySingleton<_i297.GetAccountsUseCase>(
-        () => _i297.GetAccountsUseCase(gh<_i581.AccountsRepository>()));
+    gh.factory<_i580.AccountCubit>(() => _i580.AccountCubit(
+          gh<_i297.GetAccountsUseCase>(),
+          gh<_i313.AddAccountUseCase>(),
+          gh<_i1063.DeleteAccountUseCase>(),
+          gh<_i663.SearchAccountsUseCase>(),
+        ));
     gh.factory<_i793.ReportsCubit>(
         () => _i793.ReportsCubit(gh<_i1015.GetDashboardStatsUseCase>()));
     gh.factory<_i295.ContactsBloc>(() => _i295.ContactsBloc(
@@ -229,12 +212,6 @@ extension GetItInjectableX on _i174.GetIt {
           gh<_i607.AddProductUseCase>(),
           gh<_i607.UpdateProductUseCase>(),
           gh<_i607.DeleteProductUseCase>(),
-        ));
-    gh.factory<_i580.AccountCubit>(() => _i580.AccountCubit(
-          gh<_i297.GetAccountsUseCase>(),
-          gh<_i313.AddAccountUseCase>(),
-          gh<_i1063.DeleteAccountUseCase>(),
-          gh<_i663.SearchAccountsUseCase>(),
         ));
     return this;
   }

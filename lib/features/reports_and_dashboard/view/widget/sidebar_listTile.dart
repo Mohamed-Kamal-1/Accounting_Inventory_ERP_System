@@ -1,18 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/utils/menu_items.dart';
+
 class SidebarListTile extends StatelessWidget {
-  final dynamic item;
-  final bool isActive;
+  final SidebarItem item;
 
   const SidebarListTile({
     super.key,
     required this.item,
-    required this.isActive,
   });
 
   @override
   Widget build(BuildContext context) {
+    // كل عنصر يراقب المسار بنفسه
+    final currentRoute = GoRouterState.of(context).uri.path;
+    final isActive = currentRoute == item.route;
+
     return ListTile(
       leading: Icon(
         item.icon,

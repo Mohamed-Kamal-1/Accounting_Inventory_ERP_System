@@ -13,40 +13,51 @@ class InventoryActionBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      elevation: 1,
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
         padding: const EdgeInsets.all(12.0),
         child: Row(
           children: [
+            // حقل البحث
             Expanded(
+              flex: 2,
               child: TextField(
+                onChanged: (query) {
+                  context.read<InventoryBloc>().add(SearchProductsEvent(query));
+                },
                 decoration: const InputDecoration(
-                  labelText: 'ابحث باسم الصنف أو الكود...',
+                  hintText: 'ابحث عن صنف بالاسم أو الكود...',
                   prefixIcon: Icon(Icons.search),
                   border: OutlineInputBorder(),
+                  contentPadding:
+                      EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                 ),
-                onChanged: (val) {
-                  context.read<InventoryBloc>().add(SearchProductsEvent(val));
-                },
               ),
             ),
-            const SizedBox(width: 16),
-            SizedBox(
-              width: 200,
+            const SizedBox(width: 15),
+
+            // القائمة المنسدلة للفلترة بالأقسام
+            Expanded(
+              flex: 1,
               child: DropdownButtonFormField<String>(
                 value: state.selectedCategoryId,
-                decoration: const InputDecoration(labelText: 'تصفية حسب القسم'),
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  contentPadding:
+                      EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                ),
                 items: [
                   const DropdownMenuItem(
-                      value: 'all', child: Text('كل التصنيفات')),
-                  ...state.categories.map((cat) =>
-                      DropdownMenuItem(value: cat.id, child: Text(cat.name))),
+                      value: 'all', child: Text('جميع الأقسام')),
+                  ...state.categories.map((c) =>
+                      DropdownMenuItem(value: c.id, child: Text(c.name))),
                 ],
-                onChanged: (val) {
-                  if (val != null) {
+                onChanged: (catId) {
+                  if (catId != null) {
                     context
                         .read<InventoryBloc>()
-                        .add(FilterByCategoryEvent(val));
+                        .add(FilterByCategoryEvent(catId));
                   }
                 },
               ),
