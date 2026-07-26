@@ -2,7 +2,7 @@
 // import 'package:flutter/material.dart';
 // import 'package:flutter_bloc/flutter_bloc.dart';
 //
-// import '../view_model/cubit/Account_Cubit.dart';
+// import '../view_model/bloc/Account_Cubit.dart';
 //
 // class AccountsSearchBar extends StatelessWidget {
 //   const AccountsSearchBar({super.key});

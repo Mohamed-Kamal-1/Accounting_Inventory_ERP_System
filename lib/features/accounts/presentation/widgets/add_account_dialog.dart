@@ -1,74 +1,116 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../all_data_service/data/models/account/all_accounts.dart';
+import '../../../../core/app_text/accounts_text/account_screen_text.dart';
+import '../../../../core/dimensions/Dimension_app.dart';
+import '../../domain/entities/account_entity.dart';
 import '../view_model/cubit/Account_Cubit.dart';
 
 class AddAccountDialog extends StatefulWidget {
   final String type;
-  final AccountsCubit cubit; // نمرر الكيوبيت هنا
 
-  const AddAccountDialog({super.key, required this.type, required this.cubit});
+  const AddAccountDialog({
+    super.key,
+    required this.type,
+  });
 
   @override
   State<AddAccountDialog> createState() => _AddAccountDialogState();
 }
 
 class _AddAccountDialogState extends State<AddAccountDialog> {
-  final nameCtrl = TextEditingController();
-  final phoneCtrl = TextEditingController();
-  final cityCtrl = TextEditingController();
+  final _nameController = TextEditingController();
+  final _phoneController = TextEditingController();
+  final _cityController = TextEditingController();
 
-  void _onSave() {
-    if (nameCtrl.text.trim().isNotEmpty) {
-      final newAcc = AccountModel(
+  void _onSave(BuildContext context) {
+    if (_nameController.text.trim().isNotEmpty) {
+      final newAccount = AccountEntity(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
-        name: nameCtrl.text.trim(),
-        phone: phoneCtrl.text.trim(),
-        city: cityCtrl.text.trim(),
+        name: _nameController.text.trim(),
+        phone: _phoneController.text.trim(),
+        city: _cityController.text.trim(),
         type: widget.type,
       );
 
-      widget.cubit.addNewAccount(newAcc); // استخدام الكيوبيت الممرر
-      Navigator.of(context).pop(); // إغلاق الديالوج
+      context.read<AccountCubit>().createAccount(newAccount);
+      Navigator.of(context).pop();
     }
+  }
+
+  String _getDialogTitle() {
+    switch (widget.type) {
+      case 'customer':
+        return AccountsStrings.addCustomer;
+      case 'supplier':
+        return AccountsStrings.addSupplier;
+      case 'employee':
+        return AccountsStrings.addEmployee;
+      case 'representative':
+        return AccountsStrings.addRep;
+      default:
+        return AccountsStrings.addDefault;
+    }
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _phoneController.dispose();
+    _cityController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text("إضافة ${widget.type == 'customer' ? 'عميل' : 'جديد'}",
-          textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.bold)),
+      title: Text(
+        _getDialogTitle(),
+        textAlign: TextAlign.center,
+      ),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
-              controller: nameCtrl,
-              decoration: const InputDecoration(labelText: "الاسم", border: OutlineInputBorder()),
-              onSubmitted: (_) => _onSave(), // Enter يضيف
+              controller: _nameController,
+              decoration: const InputDecoration(
+                labelText: AccountsStrings.name,
+                border: OutlineInputBorder(),
+              ),
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: Dimension.heightSizeBox12),
             TextField(
-              controller: phoneCtrl,
-              decoration: const InputDecoration(labelText: "الهاتف", border: OutlineInputBorder()),
+              controller: _phoneController,
+              decoration: const InputDecoration(
+                labelText: AccountsStrings.phone,
+                border: OutlineInputBorder(),
+              ),
               keyboardType: TextInputType.phone,
-              onSubmitted: (_) => _onSave(), // Enter يضيف
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: Dimension.heightSizeBox12),
             TextField(
-              controller: cityCtrl,
-              decoration: const InputDecoration(labelText: "المدينة", border: OutlineInputBorder()),
-              onSubmitted: (_) => _onSave(), // Enter يضيف
+              controller: _cityController,
+              decoration: const InputDecoration(
+                labelText: AccountsStrings.city,
+                border: OutlineInputBorder(),
+              ),
             ),
           ],
         ),
       ),
       actions: [
-        TextButton(onPressed: () => Navigator.pop(context), child: const Text("إلغاء")),
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text(AccountsStrings.cancel),
+        ),
         ElevatedButton(
-          style: ElevatedButton.styleFrom(backgroundColor: Colors.teal, foregroundColor: Colors.white),
-          onPressed: _onSave, // الضغط يضيف
-          child: const Text("حفظ البيانات"),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Theme.of(context).colorScheme.primary,
+            foregroundColor: Colors.white,
+          ),
+          onPressed: () => _onSave(context),
+          child: const Text(AccountsStrings.save),
         ),
       ],
     );

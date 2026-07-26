@@ -1,8 +1,13 @@
 import 'package:get_it/get_it.dart';
 import 'package:injectable/injectable.dart';
-import 'di.config.dart'; // هذا الملف يتم توليده تلقائياً
 
-final getIt = GetIt.instance;
+import 'di.config.dart';
 
-@InjectableInit()
+final GetIt getIt = GetIt.instance;
+
+@InjectableInit(
+  initializerName: 'init', // الافتراضي
+  preferRelativeImports: true,
+  asExtension: true,
+)
 void configureDependencies() => getIt.init();

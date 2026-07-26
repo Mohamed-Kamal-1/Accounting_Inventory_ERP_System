@@ -1,61 +1,80 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 
-import '../../../../all_data_service/data/models/account/all_accounts.dart';
+import '../../../domain/entities/account_entity.dart';
+import '../../../domain/usecases/add_account_usecase.dart';
+import '../../../domain/usecases/delete_account_usecase.dart';
+import '../../../domain/usecases/get_accounts_usecase.dart';
+import '../../../domain/usecases/search_accounts_usecase.dart';
 import 'Accounts_State.dart';
 
 @injectable
-class AccountsCubit extends Cubit<AccountsState> {
-  final AccountService _service;
+class AccountCubit extends Cubit<AccountState> {
+  final GetAccountsUseCase _getAccountsUseCase;
+  final AddAccountUseCase _addAccountUseCase;
+  final DeleteAccountUseCase _deleteAccountUseCase;
+  final SearchAccountsUseCase _searchAccountsUseCase;
 
-  AccountsCubit(this._service) : super(AccountsInitial());
+  AccountCubit(
+    this._getAccountsUseCase,
+    this._addAccountUseCase,
+    this._deleteAccountUseCase,
+    this._searchAccountsUseCase,
+  ) : super(AccountInitial());
 
-  // 1. جلب البيانات لكل الأنواع (الموحدة)
-  void loadAccounts(String type) {
-    emit(AccountsLoading());
-    List<AccountModel> data = _getFilteredList(type);
-    emit(AccountsLoaded(List.from(data))); // List.from لضمان تحديث الـ UI
-  }
+  Future<void> fetchAccounts(String type) async {
+    emit(AccountLoading());
+    try {
+      List<AccountEntity> allAccounts;
 
-  // 2. البحث الموحد لكل الأنواع
-  void searchAccounts(String query, String type) {
-    final all = _getFilteredList(type);
-    final filtered = all
-        .where((a) => a.name.contains(query) || a.phone.contains(query))
-        .toList();
-    emit(AccountsLoaded(filtered));
-  }
+      if (type == 'all') {
+        allAccounts = await _getAccountsUseCase('');
+      } else {
+        allAccounts = await _getAccountsUseCase(type);
+      }
 
-  // 3. إضافة حساب جديد وتحديث فوري
-  void addNewAccount(AccountModel account) {
-    _service.addAccount(account);
-    loadAccounts(account.type); // تحديث القائمة فوراً بناءً على النوع
-  }
-
-  // 4. حذف حساب وتحديث فوري (نفس نظام المخزن)
-  void deleteAccount(String id, String type) {
-    _service.deleteAccount(id, type); // حذف من السيرفس والذاكرة
-    loadAccounts(type); // إعادة تحميل القائمة ليمسح الصف من الشاشة فوراً
-  }
-
-  // دالة مساعدة خاصة بالكيوبيت لجلب اللستة الصح بناءً على النوع
-  List<AccountModel> _getFilteredList(String type) {
-    switch (type) {
-      case 'customer':
-        return _service.customers;
-      case 'supplier':
-        return _service.suppliers;
-      case 'employee':
-        return _service.employees;
-      case 'representative':
-        return _service.reps;
-      default:
-        return [];
+      if (type == 'all') {
+        emit(AccountLoaded(allAccounts));
+      } else {
+        final filtered = allAccounts
+            .where(
+                (a) => a.type.trim().toLowerCase() == type.trim().toLowerCase())
+            .toList();
+        emit(AccountLoaded(filtered));
+      }
+    } catch (e) {
+      emit(AccountError(e.toString()));
     }
   }
 
-  void resetAllData(String id, String type) async {
-    _service.deleteAccount(id, type);
-    loadAccounts(type);
+  Future<void> createAccount(AccountEntity account) async {
+    try {
+      await _addAccountUseCase(account);
+      await fetchAccounts(account.type);
+    } catch (e) {
+      emit(AccountError(e.toString()));
+    }
+  }
+
+  Future<void> removeAccount(String id, String type) async {
+    try {
+      await _deleteAccountUseCase(id);
+      await fetchAccounts(type);
+    } catch (e) {
+      emit(AccountError(e.toString()));
+    }
+  }
+
+  Future<void> search(String query, String type) async {
+    if (query.isEmpty) {
+      await fetchAccounts(type);
+      return;
+    }
+    try {
+      final filtered = await _searchAccountsUseCase(query, type);
+      emit(AccountLoaded(filtered));
+    } catch (e) {
+      emit(AccountError(e.toString()));
+    }
   }
 }

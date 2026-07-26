@@ -1,45 +1,88 @@
-import 'package:accounting_desktop/core/di/di.dart';
-import 'package:accounting_desktop/features/sales/presentation/view/returns/sales_return_tab.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../../core/app_text/sales_text/sales_screen_text.dart';
+import '../../../../core/di/di.dart';
 import '../view_model/cubit/sales_cubit.dart';
-import 'invoice/Invoices_Log/Invoices_Log_Tab.dart';
-import 'invoice/Sales_Invoice_Tab/Sales_Invoice_Tab.dart';
+import '../view_model/cubit/sales_invoice_state.dart';
+import '../widget/cart_list_widget.dart';
+import '../widget/customer_info_widget.dart';
+import '../widget/invoice_totals_widget.dart';
+import '../widget/product_search_widget.dart';
+import '../widget/sales_tabs_widget.dart';
 
-class SalesScreen extends StatelessWidget {
+class SalesScreen extends StatefulWidget {
   const SalesScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 3,
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text(SalesStrings.mangeSales),
-          bottom: const TabBar(
-            isScrollable: true,
-            tabs: [
-              Tab(text: SalesStrings.salesTab),
-              Tab(text: SalesStrings.returnsTab),
-              Tab(text: SalesStrings.invoicesLogTab),
-            ],
-          ),
-        ),
-        body: BlocProvider(
-          create: (context) => getIt.get<SalesInvoiceCubit>()..loadInvoiceData(),
+  State<SalesScreen> createState() => _SalesScreenState();
+}
 
-          child: TabBarView(
-            children: [
-             const SalesInvoiceTab(
-                invoiceTitleButton: SalesStrings.addInvoice,
-              ),
-              const SalesReturnTab(
-                invoiceTitleButton: SalesStrings.addReturn,
-              ),
-              const InvoicesLogTab(),
-            ],
+class _SalesScreenState extends State<SalesScreen> {
+  final TextEditingController contactController = TextEditingController();
+  final TextEditingController cityController = TextEditingController();
+
+  @override
+  void dispose() {
+    contactController.dispose();
+    cityController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider<SalesCubit>(
+      create: (context) => getIt.get<SalesCubit>()..fetchProducts(),
+      child: BlocListener<SalesCubit, SalesState>(
+        listenWhen: (previous, current) =>
+            previous.isSuccess != current.isSuccess ||
+            previous.submitError != current.submitError,
+        listener: (context, state) {
+          if (state.isSuccess) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                  content: Text('✅ تم حفظ الفاتورة بنجاح'),
+                  backgroundColor: Colors.green),
+            );
+            contactController.clear();
+            cityController.clear();
+          } else if (state.submitError.isNotEmpty) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                  content: Text('❌ خطأ: ${state.submitError}'),
+                  backgroundColor: Colors.red),
+            );
+          }
+        },
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          body: SingleChildScrollView(
+            padding: const EdgeInsets.all(20.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  '📦 إنشاء عملية بيع',
+                  style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF2C3E50)),
+                ),
+                const SizedBox(height: 20),
+                const SalesTabsWidget(),
+                const SizedBox(height: 20),
+                CustomerInfoWidget(
+                    contactController: contactController,
+                    cityController: cityController),
+                const SizedBox(height: 20),
+                const ProductSearchWidget(),
+                const SizedBox(height: 20),
+                const CartListWidget(),
+                const SizedBox(height: 20),
+                InvoiceTotalsWidget(
+                    contactController: contactController,
+                    cityController: cityController),
+              ],
+            ),
           ),
         ),
       ),

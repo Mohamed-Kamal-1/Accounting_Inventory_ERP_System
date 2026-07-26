@@ -2,169 +2,175 @@ import 'package:accounting_desktop/features/sales/presentation/view_model/cubit/
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 
-import '../../../../all_data_service/data/models/product_model.dart';
-import '../../../data/models/invoice_item_model.dart';
+import '../../../../inventory/domain/repositories/inventory_repository.dart';
+import '../../../domain/entities/sale_invoice_entity.dart';
 
 @injectable
-class SalesInvoiceCubit extends Cubit<SalesInvoiceState> {
-  final ProductService _service;
+class SalesCubit extends Cubit<SalesState> {
+  final InventoryRepository _inventoryRepository;
 
-  SalesInvoiceCubit(this._service) : super(SalesInvoiceInitial());
+  SalesCubit(this._inventoryRepository) : super(const SalesState());
 
-  String _invNum = '';
-  String _custName = '';
-  String _repName = '';
-  String _phone = '';
-  String _date = '';
+  // 1. جلب المنتجات
+  Future<void> fetchProducts() async {
+    emit(state.copyWith(isLoadingProducts: true, productsError: ''));
 
-  void loadInvoiceData() {
-    _update();
+    final result = await _inventoryRepository.getProducts();
+
+    result.fold(
+      onFailure: (failure) {
+        emit(state.copyWith(
+          isLoadingProducts: false,
+          productsError: failure.message,
+        ));
+      },
+      onSuccess: (products) {
+        emit(state.copyWith(
+          isLoadingProducts: false,
+          availableProducts: products,
+        ));
+      },
+    );
   }
 
-  void updateHeader({String? cust, String? rep, String? ph, String? date}) {
-    if (_service.nextInvoiceNumber != 0) {
-      _invNum = _service.nextInvoiceNumber.toString();
-    }
-    if (cust != null) _custName = cust;
-    if (rep != null) _repName = rep;
-    if (ph != null) _phone = ph;
-    if (date != null) _date = date;
-    _update();
-  }
-
-  void addProduct(ProductModel product, int qty) {
-    final invoiceItem = product.copyWith(newQuantity: qty);
-    _service.addToInvoice(invoiceItem);
-    _update();
-  }
-
-  void removeProduct(
-    int index,
-  ) {
-    _service.removeFromInvoice(index);
-    _update();
-  }
-
-  void _update() {
-    emit(SalesInvoiceUpdated(
-      items: List.from(_service.invoiceItems),
-      total: _service.invoiceTotal,
-      invoiceNum: _invNum,
-      customerName: _custName,
-      repName: _repName,
-      phone: _phone,
-      date: _date,
+  // 2. تغيير التبويب
+  void changeMode(String mode) {
+    emit(state.copyWith(
+      currentMode: mode,
+      cart: [], // تفريغ السلة منطقياً عند تغيير نوع المعاملة
+      subTotal: 0.0,
+      grandTotal: 0.0,
+      remainingAmount: 0.0,
     ));
   }
 
-  // داخل SalesInvoiceCubit
-  // void saveInvoice() {
-  //   final invoice = InvoiceModel(
-  //     id: _invNum,
-  //     customerName: _custName,
-  //     repName: _repName,
-  //     phone: _phone,
-  //     date: _date,
-  //     items: List.from(_service.invoiceItems),
-  //     total: _service.invoiceTotal,
-  //   );
-  //
-  //   _service.saveInvoice(invoice);
-  //
-  //   // تصفير المتغيرات المحلية فوراً بعد الحفظ
-  //   _custName = '';
-  //   _repName = '';
-  //   _phone = '';
-  //   _date = '';
-  //   _invNum = _service.nextInvoiceNumber.toString(); // تحديث الرقم للتالي
-  //
-  //   // تحديث الواجهة ببيانات فارغة تماماً
-  //   _update();
-  // }
+  // 3. إضافة صنف للجدول
+  void addItemToCart(String pId, String pName, double price, int qty) {
+    final List<SaleInvoiceItemEntity> currentCart = List.from(state.cart);
+    final existingIndex =
+        currentCart.indexWhere((item) => item.productId == pId);
 
-  // sales_invoice_cubit.dart
-  void saveInvoice({bool isReturn = false}) {
-    late final invoice = InvoiceModel(
-        id: _invNum,
-        customerName: _custName,
-        repName: _repName,
-        phone: _phone,
-        date: _date,
-        items: List.from(_service.invoiceItems),
-        total: _service.invoiceTotal,
-        isReturn: isReturn);
-
-    String validationValue = validation(invoice);
-
-    if (validationValue == 'success') {
-      _service.saveInvoice(invoice, isPurchase: false);
-    }
-    validationInputs(invoice);
-
-    // تنفيذ لوجيك الخصم والتصفير
-    emit(SalesInvoiceUpdated(
-      items: [],
-      total: 0.0,
-      invoiceNum: '',
-      customerName: '',
-      repName: '',
-      phone: '',
-      date: '',
-    ));
-    // تحديث الحالة بقائمة فارغة وإجمالي صفر
-    emit(SalesInvoiceUpdated(items: [], total: 0.0));
-
-    // (اختياري) ممكن تعمل emit لـ State تانية تطلع رسالة نجاح
-  }
-
-  // داخل SalesInvoiceCubit
-
-  void resetInvoiceSystem() {
-    // تنفيذ المسح في السيرفس
-    _service.clearInvoiceHistory();
-
-    // إعادة ضبط رقم الفاتورة في الكيوبيت ليكون "1"
-    _invNum = _service.nextInvoiceNumber.toString();
-
-    // تصفير باقي الحقول
-    _custName = '';
-    _repName = '';
-    _phone = '';
-
-    // إرسال الحالة الجديدة للـ UI
-    _update();
-  }
-
-  void validationInputs(InvoiceModel invoice) {
-    emit(SalesInvoiceSaveEmptyState(errorMessage: validation(invoice)));
-  }
-
-  String validation(InvoiceModel invoice) {
-    if (invoice.customerName.isEmpty)
-      return 'يرجى إدخال اسم العميل أولاً';
-    else if (invoice.repName.isEmpty) {
-      return 'يرجى إدخال اسم المورد أولاً';
-    } else if (invoice.phone.isEmpty) {
-      return 'يرجى إدخال الهاتف ';
-    } else if (invoice.date.isEmpty) {
-      return 'يرجى التاريخ ';
-    } else if (invoice.items.isEmpty) {
-      return 'يرجى الصنف ';
+    if (existingIndex >= 0) {
+      final existingItem = currentCart[existingIndex];
+      final newQty = existingItem.quantity + qty;
+      currentCart[existingIndex] = SaleInvoiceItemEntity(
+        productId: pId,
+        productName: pName,
+        unitPrice: price,
+        quantity: newQty,
+        itemDiscountPercent: 0,
+        total: price * newQty,
+      );
     } else {
-      return 'success';
+      currentCart.add(SaleInvoiceItemEntity(
+        productId: pId,
+        productName: pName,
+        unitPrice: price,
+        quantity: qty,
+        itemDiscountPercent: 0,
+        total: price * qty,
+      ));
     }
+
+    _calculateTotals(newCart: currentCart);
+  }
+
+  // 4. إزالة صنف من الجدول
+  void removeItemFromCart(int index) {
+    final List<SaleInvoiceItemEntity> currentCart = List.from(state.cart);
+    currentCart.removeAt(index);
+    _calculateTotals(newCart: currentCart);
+  }
+
+  // 5. تحديث نسبة الخصم
+  void updateDiscount(double discount) {
+    _calculateTotals(newDiscount: discount);
+  }
+
+  // 6. تحديث المبلغ المدفوع
+  void updatePaidAmount(double paidAmount) {
+    _calculateTotals(newPaidAmount: paidAmount);
+  }
+
+  // حساب الإجماليات
+  void _calculateTotals({
+    List<SaleInvoiceItemEntity>? newCart,
+    double? newDiscount,
+    double? newPaidAmount,
+  }) {
+    final cart = newCart ?? state.cart;
+    final discount = newDiscount ?? state.invoiceDiscountPercent;
+    final paid = newPaidAmount ?? state.paidAmount;
+
+    final subTotal = cart.fold(0.0, (sum, item) => sum + item.total);
+    final grandTotal = subTotal - (subTotal * (discount / 100));
+    final remainingAmount = grandTotal - paid;
+
+    emit(state.copyWith(
+      cart: cart,
+      invoiceDiscountPercent: discount,
+      paidAmount: paid,
+      subTotal: subTotal,
+      grandTotal: grandTotal,
+      remainingAmount: remainingAmount,
+    ));
+  }
+
+  // 7. حفظ الفاتورة
+  Future<void> submitInvoice({
+    required String contactId,
+    required String contactName,
+    required String city,
+  }) async {
+    if (state.cart.isEmpty) {
+      emit(state.copyWith(submitError: 'السلة فارغة. يرجى إضافة أصناف.'));
+      // إعادة تصفير الخطأ حتى لا يعلق
+      emit(state.copyWith(submitError: ''));
+      return;
+    }
+
+    emit(state.copyWith(isSubmitting: true, submitError: ''));
+
+    final invoice = SaleInvoiceEntity(
+      contactId: contactId.isEmpty ? 'dummy_id' : contactId,
+      contactName: contactName,
+      mode: state.currentMode,
+      date: DateTime.now(),
+      city: city,
+      lineName: '',
+      items: state.cart,
+      subTotal: state.subTotal,
+      invoiceDiscountPercent: state.invoiceDiscountPercent,
+      grandTotal: state.grandTotal,
+      paidAmount: state.paidAmount,
+      remainingAmount: state.remainingAmount,
+    );
+
+    try {
+      // محاكاة الإرسال لقاعدة البيانات (استبدلها لاحقاً بالـ UseCase الخاص بك)
+      await Future.delayed(const Duration(seconds: 1));
+
+      _handleSuccess();
+    } catch (e) {
+      emit(state.copyWith(
+          isSubmitting: false, submitError: 'حدث خطأ غير متوقع أثناء الحفظ'));
+    }
+  }
+
+  // تفريغ الفاتورة بعد النجاح
+  void _handleSuccess() {
+    emit(state.copyWith(
+      isSubmitting: false,
+      isSuccess: true,
+      cart: const [],
+      subTotal: 0.0,
+      grandTotal: 0.0,
+      remainingAmount: 0.0,
+      paidAmount: 0.0,
+      invoiceDiscountPercent: 0.0,
+    ));
+
+    // إعادة الـ isSuccess إلى false حتى لا تظهر رسالة النجاح مراراً
+    emit(state.copyWith(isSuccess: false));
   }
 }
-
-// String validation() {
-//   // 1. التحقق من البيانات الأساسية (اسم العميل والجدول)
-//   if (_custName
-//       .trim()
-//       .isEmpty) {
-//     return 'يرجى إدخال اسم العميل أولاً'; // وقف التنفيذ هنا ومكملش حفظ
-//   }
-//
-//   if (_service.invoiceItems.isEmpty) {
-//     return 'الفاتورة فارغة! أضف أصنافاً أولا'; // وقف التنفيذ
-//   }
-// }

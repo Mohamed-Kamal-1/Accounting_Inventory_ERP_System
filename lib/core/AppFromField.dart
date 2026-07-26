@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-
 // typedef Validator = String? Function(String? text);
 // typedef OnChange = void Function(String? text);
-typedef SendProduct = void Function(String controllerName,);
+typedef SendProduct = void Function(
+  String controllerName,
+);
+
 class AppTextField extends StatefulWidget {
   final SendProduct sendProduct;
   final String label;
@@ -41,7 +43,7 @@ class _AppTextFieldState extends State<AppTextField> {
       child: TextField(
         textInputAction: widget.textInputAction,
         controller: widget.controller,
-        onChanged: widget.sendProduct ,
+        onChanged: widget.sendProduct,
         style: GoogleFonts.inter(fontSize: 16),
         keyboardType: widget.keyboardType,
         decoration: InputDecoration(

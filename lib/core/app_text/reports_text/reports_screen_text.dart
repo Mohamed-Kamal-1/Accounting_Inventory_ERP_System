@@ -1,13 +1,13 @@
 class ReportsStrings {
-  static const String mainTitle = "التقارير والإحصائيات";
-  static const String invTab = "المخزون";
-  static const String salesTab = "المبيعات";
-  static const String buyTab = "المشتريات";
-  static const String repsTab = "المندوبين";
-  static const String financeTab = "المالية";
+  static const String dashboardTitle = "لوحة التحكم والتقارير";
+  static const String totalSales = "إجمالي المبيعات";
+  static const String totalPurchases = "إجمالي المشتريات";
+  static const String inventoryValue = "قيمة المخزون (بأسعار الشراء)";
+  static const String customersCount = "إجمالي عدد العملاء";
+  static const String refresh = "تحديث البيانات";
+  static const String currency = "ر.س";
 
-  static const String searchHint = "بحث...";
-  static const String fromDate = "من تاريخ";
-  static const String toDate = "إلى تاريخ";
+  // النصوص اللي كانت ناقصة وتم إضافتها
+  static const String searchHint = "ابحث هنا...";
   static const String showReport = "عرض التقرير";
 }

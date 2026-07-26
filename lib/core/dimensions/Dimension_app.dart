@@ -59,4 +59,19 @@ abstract class Dimension {
   //================================//
   static const int flex1 = 1;
   static const int flex4 = 4;
+
+  static const double borderRadius = 12.0;
+  static const double cardRadius = 16.0;
+  static const double buttonHeight = 56.0;
+  static const double inputHeight = 56.0;
+  static const double iconSizeLarge = 28.0;
+  static const double iconSizeMedium = 24.0;
+
+  // ─── Spacing ───
+  static const double spacingXs = 4.0;
+  static const double spacingSm = 8.0;
+  static const double spacingMd = 16.0;
+  static const double spacingLg = 24.0;
+  static const double spacingXl = 32.0;
+  static const double spacingXxl = 48.0;
 }
