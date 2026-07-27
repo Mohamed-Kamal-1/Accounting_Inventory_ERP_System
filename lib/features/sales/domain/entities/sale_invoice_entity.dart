@@ -1,3 +1,4 @@
+import 'package:accounting_desktop/features/sales/domain/entities/sales_invoice_item_entity.dart';
 import 'package:equatable/equatable.dart';
 
 class SaleInvoiceEntity extends Equatable {
@@ -33,25 +34,4 @@ class SaleInvoiceEntity extends Equatable {
 
   @override
   List<Object?> get props => [id, contactId, items, grandTotal];
-}
-
-class SaleInvoiceItemEntity extends Equatable {
-  final String productId;
-  final String productName;
-  final double unitPrice;
-  final int quantity;
-  final double itemDiscountPercent;
-  final double total;
-
-  const SaleInvoiceItemEntity({
-    required this.productId,
-    required this.productName,
-    required this.unitPrice,
-    required this.quantity,
-    required this.itemDiscountPercent,
-    required this.total,
-  });
-
-  @override
-  List<Object?> get props => [productId, quantity, total];
 }

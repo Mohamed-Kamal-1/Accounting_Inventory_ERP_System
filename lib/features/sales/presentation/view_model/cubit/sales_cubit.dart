@@ -4,6 +4,7 @@ import 'package:injectable/injectable.dart';
 
 import '../../../../inventory/domain/repositories/inventory_repository.dart';
 import '../../../domain/entities/sale_invoice_entity.dart';
+import '../../../domain/entities/sales_invoice_item_entity.dart';
 
 @injectable
 class SalesCubit extends Cubit<SalesState> {

@@ -4,6 +4,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../ widgets/inventory_stats_cards.dart';
 import '../ widgets/product_form_dialog.dart';
 import '../../../../core/di/di.dart';
+import '../../../auth/presentation/cubit/auth_cubit.dart';
+import '../../../auth/presentation/cubit/auth_state.dart';
 import '../bloc/inventory_bloc.dart';
 import '../bloc/inventory_event.dart';
 import '../bloc/inventory_state.dart';
@@ -58,21 +60,40 @@ class InventoryScreen extends StatelessWidget {
                         ),
                         Row(
                           children: [
-                            // 1. زر إضافة الأقسام (الذي ينقصك)
-                            OutlinedButton.icon(
-                              icon: const Icon(Icons.category),
-                              label: const Text('إدارة الأقسام'),
-                              onPressed: () {
-                                showDialog(
-                                  context: context,
-                                  builder: (ctx) => CategoryManagementDialog(
-                                      bloc: context.read<InventoryBloc>()),
-                                );
-                              },
-                            ),
-                            const SizedBox(width: 15),
+                            // 1. زر إدارة الأقسام (يظهر للمدير فقط)
+                            Builder(builder: (context) {
+                              // قراءة حالة المستخدم الحالي من AuthCubit
+                              final authState = context.read<AuthCubit>().state;
+                              bool isAdmin = false;
 
-                            // 2. زر إضافة الصنف الموجود عندك حالياً
+                              if (authState is AuthSuccess) {
+                                isAdmin = authState.user.role ==
+                                    'admin'; // تأكد أن الكلمة تطابق ما في قاعدة البيانات
+                              }
+
+                              // إذا لم يكن مديراً، نُرجع مساحة فارغة (SizedBox.shrink)
+                              if (!isAdmin) return const SizedBox.shrink();
+
+                              // إذا كان مديراً، نظهر الزر
+                              return Padding(
+                                padding: const EdgeInsets.only(left: 15.0),
+                                child: OutlinedButton.icon(
+                                  icon: const Icon(Icons.category),
+                                  label: const Text('إدارة الأقسام'),
+                                  onPressed: () {
+                                    showDialog(
+                                      context: context,
+                                      builder: (ctx) =>
+                                          CategoryManagementDialog(
+                                              bloc: context
+                                                  .read<InventoryBloc>()),
+                                    );
+                                  },
+                                ),
+                              );
+                            }),
+
+                            // 2. زر إضافة صنف جديد (متاح حسب رغبتك، للكل أو للمدير فقط بنفس الطريقة)
                             ElevatedButton.icon(
                               style: ElevatedButton.styleFrom(
                                   backgroundColor: const Color(0xFF2ECC71)),

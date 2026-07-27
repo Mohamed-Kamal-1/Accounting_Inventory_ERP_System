@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 
 import '../../../../inventory/domain/entities/product_entity.dart';
-import '../../../domain/entities/sale_invoice_entity.dart';
+import '../../../domain/entities/sales_invoice_item_entity.dart';
 
 class SalesState extends Equatable {
   final String currentMode;
