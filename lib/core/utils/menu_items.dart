@@ -15,7 +15,6 @@ class SidebarItem {
 }
 
 const List<SidebarItem> appMenuItems = [
-  // ====================== قسم الإدارة (Admin) ======================
   SidebarItem(
       title: 'لوحة التحكم',
       icon: Icons.dashboard,
@@ -96,8 +95,6 @@ const List<SidebarItem> appMenuItems = [
       icon: Icons.settings,
       route: '/settings',
       roles: ['admin']),
-
-  // ====================== قسم المناديب (Sales) ======================
   SidebarItem(
       title: 'مخزني',
       icon: Icons.inventory_2,
@@ -128,8 +125,6 @@ const List<SidebarItem> appMenuItems = [
       icon: Icons.account_box,
       route: '/salesman_customers',
       roles: ['sales']),
-
-  // ====================== قسم المعاينات (Preview) ======================
   SidebarItem(
       title: 'معاينات',
       icon: Icons.search,
@@ -140,8 +135,6 @@ const List<SidebarItem> appMenuItems = [
       icon: Icons.assignment,
       route: '/agent_tasks',
       roles: ['preview']),
-
-  // ====================== قسم الفنيين (Technician) ======================
   SidebarItem(
       title: 'طلب معاينة',
       icon: Icons.handyman,

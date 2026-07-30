@@ -31,27 +31,21 @@ class ContactsRemoteDataSourceImpl {
     try {
       String? createdUserId;
 
-      // إذا كان المدخل موظفاً، نقوم بإنشاء حساب له أولاً في نظام Supabase Auth
       if ((contact.type == 'sales' ||
               contact.type == 'preview' ||
               contact.type == 'technician') &&
           email != null &&
           password != null) {
-        // استخدام ميزة signUp لإنشاء الحساب
-        final authResponse = await supabaseClient.auth.signUp(
-          email: email,
-          password: password,
-          data: {'full_name': contact.name, 'role': contact.type},
-        );
+        final response = await supabaseClient.rpc('admin_create_user', params: {
+          'p_email': email,
+          'p_password': password,
+          'p_full_name': contact.name,
+          'p_role': contact.type,
+        });
 
-        if (authResponse.user == null) {
-          throw const ServerException(
-              message: 'فشل إنشاء حساب الموظف في النظام');
-        }
-        createdUserId = authResponse.user!.id;
+        createdUserId = response as String;
       }
 
-      // إضافة الجهة إلى جدول contacts وربطها بالـ user_id إن وجد
       final finalContact = ContactModel(
         id: contact.id,
         userId: createdUserId,
@@ -78,7 +72,6 @@ class ContactsRemoteDataSourceImpl {
     }
   }
 
-  // أضف هذه الدالة داخل الـ Impl
   @override
   Future<void> updateContact(ContactModel contact) async {
     try {

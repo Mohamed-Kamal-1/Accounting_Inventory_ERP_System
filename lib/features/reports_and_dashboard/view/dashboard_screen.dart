@@ -9,129 +9,132 @@ class DashboardScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: Colors.transparent, // تعتمد على لون الهيكل الرئيسي
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // الهيدر وزر الإيداع
-            SizedBox(
-              width: double.infinity,
-              child: Wrap(
-                alignment: WrapAlignment.spaceBetween,
-                crossAxisAlignment: WrapCrossAlignment.center,
-                runSpacing: 10,
-                children: [
-                  const Text(
-                    'داشبورد الخزنة والسيولة',
-                    style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF2C3E50)),
-                  ),
-                  ElevatedButton.icon(
-                    onPressed: () => _openAddModal(context),
-                    icon: const Icon(Icons.add),
-                    label: const Text('إيداع مبالغ إضافية'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF2ECC71),
-                      foregroundColor: Colors.white,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 15),
-
-            // كارت الفلاتر (التواريخ)
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                  color: Colors.white, borderRadius: BorderRadius.circular(10)),
-              child: Wrap(
-                crossAxisAlignment: WrapCrossAlignment.center,
-                spacing: 10,
-                runSpacing: 10,
-                children: [
-                  const Text('من:',
-                      style: TextStyle(fontWeight: FontWeight.bold)),
-                  _buildDateInput('2026-07-01'),
-                  const Text('إلى:',
-                      style: TextStyle(fontWeight: FontWeight.bold)),
-                  _buildDateInput('2026-07-20'),
-                  ElevatedButton(
-                    onPressed: () {},
-                    style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF2C3E50)),
-                    child: const Text('عرض النتائج',
-                        style: TextStyle(color: Colors.white)),
-                  ),
-                  OutlinedButton(
-                    onPressed: () {},
-                    child: const Text('شغل اليوم'),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 15),
-
-            // العدادات والبطاقات الخمسة
-            SizedBox(
-              width: double.infinity,
-              child: Wrap(
-                spacing: 10,
-                runSpacing: 10,
-                children: [
-                  _buildStatCard('تحصيلات السوق', '0.00',
-                      const Color(0xFF2ECC71), Icons.handshake, screenWidth),
-                  _buildStatCard('ماليات خاصة', '0.00', const Color(0xFFF39C12),
-                      Icons.wallet, screenWidth),
-                  _buildStatCard(
-                      'مدفوعات موردين',
-                      '0.00',
-                      const Color(0xFFE74C3C),
-                      Icons.local_shipping,
-                      screenWidth),
-                  _buildStatCard('إجمالي المصروفات', '0.00',
-                      const Color(0xFFE67E22), Icons.receipt, screenWidth),
-                  _buildStatCard(
-                      'صافي الخزينة',
-                      '0.00',
-                      const Color(0xFF3498DB),
-                      Icons.account_balance,
-                      screenWidth,
-                      isNet: true),
-                ],
-              ),
-            ),
-            const SizedBox(height: 20),
-
-            // جدول تفاصيل الحركة
-            Expanded(
-              child: Container(
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // الهيدر وزر الإيداع
+              SizedBox(
                 width: double.infinity,
-                padding: const EdgeInsets.all(15),
-                decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(10)),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                child: Wrap(
+                  alignment: WrapAlignment.spaceBetween,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  runSpacing: 10,
                   children: [
-                    const Text('تفاصيل حركة النقدية',
-                        style: TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.bold)),
-                    const Divider(),
-                    const Expanded(
-                      child: Center(
-                        child: Text('جاري مزامنة البيانات...'),
+                    const Text(
+                      'داشبورد الخزنة والسيولة',
+                      style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF2C3E50)),
+                    ),
+                    ElevatedButton.icon(
+                      onPressed: () => _openAddModal(context),
+                      icon: const Icon(Icons.add),
+                      label: const Text('إيداع مبالغ إضافية'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF2ECC71),
+                        foregroundColor: Colors.white,
                       ),
                     ),
                   ],
                 ),
               ),
-            ),
-          ],
+              const SizedBox(height: 15),
+
+              // كارت الفلاتر (التواريخ)
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(10)),
+                child: Wrap(
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  spacing: 10,
+                  runSpacing: 10,
+                  children: [
+                    const Text('من:',
+                        style: TextStyle(fontWeight: FontWeight.bold)),
+                    _buildDateInput('2026-07-01'),
+                    const Text('إلى:',
+                        style: TextStyle(fontWeight: FontWeight.bold)),
+                    _buildDateInput('2026-07-20'),
+                    ElevatedButton(
+                      onPressed: () {},
+                      style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF2C3E50)),
+                      child: const Text('عرض النتائج',
+                          style: TextStyle(color: Colors.white)),
+                    ),
+                    OutlinedButton(
+                      onPressed: () {},
+                      child: const Text('شغل اليوم'),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 15),
+
+              // العدادات والبطاقات الخمسة
+              SizedBox(
+                width: double.infinity,
+                child: Wrap(
+                  spacing: 10,
+                  runSpacing: 10,
+                  children: [
+                    _buildStatCard('تحصيلات السوق', '0.00',
+                        const Color(0xFF2ECC71), Icons.handshake, screenWidth),
+                    _buildStatCard('ماليات خاصة', '0.00',
+                        const Color(0xFFF39C12), Icons.wallet, screenWidth),
+                    _buildStatCard(
+                        'مدفوعات موردين',
+                        '0.00',
+                        const Color(0xFFE74C3C),
+                        Icons.local_shipping,
+                        screenWidth),
+                    _buildStatCard('إجمالي المصروفات', '0.00',
+                        const Color(0xFFE67E22), Icons.receipt, screenWidth),
+                    _buildStatCard(
+                        'صافي الخزينة',
+                        '0.00',
+                        const Color(0xFF3498DB),
+                        Icons.account_balance,
+                        screenWidth,
+                        isNet: true),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+
+              // جدول تفاصيل الحركة
+              Expanded(
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(15),
+                  decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(10)),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text('تفاصيل حركة النقدية',
+                          style: TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.bold)),
+                      const Divider(),
+                      const Expanded(
+                        child: Center(
+                          child: Text('جاري مزامنة البيانات...'),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

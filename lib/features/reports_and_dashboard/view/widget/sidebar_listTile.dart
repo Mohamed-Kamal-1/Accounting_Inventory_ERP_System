@@ -13,7 +13,6 @@ class SidebarListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // كل عنصر يراقب المسار بنفسه
     final currentRoute = GoRouterState.of(context).uri.path;
     final isActive = currentRoute == item.route;
 

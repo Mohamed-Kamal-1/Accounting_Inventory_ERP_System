@@ -19,7 +19,6 @@ class SidebarList extends StatelessWidget {
         itemBuilder: (context, index) {
           final item = allowedItems[index];
 
-          // استخدام const أو إبقاء الـ Widget ثابته بدون اعتماد على متغيرات خارجيه
           return SidebarListTile(
             key: ValueKey(item.route),
             item: item,

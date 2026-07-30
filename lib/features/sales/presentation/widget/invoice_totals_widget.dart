@@ -1,8 +1,12 @@
+import 'package:accounting_desktop/features/sales/presentation/widget/paid_input_widget.dart';
+import 'package:accounting_desktop/features/sales/presentation/widget/submit_invoice_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../view_model/cubit/sales_cubit.dart';
 import '../view_model/cubit/sales_invoice_state.dart';
+import 'amount_display_widget.dart';
+import 'discount_input_widget.dart';
 
 class InvoiceTotalsWidget extends StatefulWidget {
   final TextEditingController contactController;
@@ -32,6 +36,8 @@ class _InvoiceTotalsWidgetState extends State<InvoiceTotalsWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final isMobile = MediaQuery.sizeOf(context).width < 600;
+
     return BlocConsumer<SalesCubit, SalesState>(
       listenWhen: (previous, current) =>
           previous.isSuccess != current.isSuccess,
@@ -49,102 +55,82 @@ class _InvoiceTotalsWidgetState extends State<InvoiceTotalsWidget> {
           child: Padding(
             padding: const EdgeInsets.all(20.0),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('الإجمالي: ${state.subTotal} ج.م',
-                        style: const TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold)),
-                    Row(
-                      children: [
-                        const Text('خصم %: ',
-                            style: TextStyle(fontWeight: FontWeight.bold)),
-                        SizedBox(
-                          width: 80,
-                          child: TextField(
-                            controller: discountController,
-                            keyboardType: TextInputType.number,
-                            onChanged: (val) {
-                              final discount = double.tryParse(val) ?? 0.0;
-                              context
-                                  .read<SalesCubit>()
-                                  .updateDiscount(discount);
-                            },
-                            decoration: const InputDecoration(
-                                border: OutlineInputBorder(),
-                                contentPadding: EdgeInsets.symmetric(
-                                    horizontal: 10, vertical: 8)),
+                isMobile
+                    ? Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          AmountDisplayWidget(
+                            label: 'الإجمالي',
+                            amount: state.subTotal,
                           ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
+                          const SizedBox(height: 15),
+                          DiscountInputWidget(controller: discountController),
+                        ],
+                      )
+                    : Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          AmountDisplayWidget(
+                            label: 'الإجمالي',
+                            amount: state.subTotal,
+                          ),
+                          DiscountInputWidget(controller: discountController),
+                        ],
+                      ),
+
                 const Divider(height: 30),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('الصافي: ${state.grandTotal} ج.م',
-                        style: const TextStyle(
-                            fontSize: 20,
+
+                // الصف الثاني
+                isMobile
+                    ? Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          AmountDisplayWidget(
+                            label: 'الصافي',
+                            amount: state.grandTotal,
                             color: Colors.green,
-                            fontWeight: FontWeight.bold)),
-                    Row(
-                      children: [
-                        const Text('المدفوع: ',
-                            style: TextStyle(fontWeight: FontWeight.bold)),
-                        SizedBox(
-                          width: 110,
-                          child: TextField(
-                            controller: paidController,
-                            keyboardType: TextInputType.number,
-                            onChanged: (val) {
-                              final paid = double.tryParse(val) ?? 0.0;
-                              context.read<SalesCubit>().updatePaidAmount(paid);
-                            },
-                            decoration: const InputDecoration(
-                                border: OutlineInputBorder(),
-                                contentPadding: EdgeInsets.symmetric(
-                                    horizontal: 10, vertical: 8)),
+                            fontSize: 20,
                           ),
-                        ),
-                      ],
-                    ),
-                    Text('المتبقي: ${state.remainingAmount} ج.م',
-                        style: const TextStyle(
-                            fontSize: 18,
+                          const SizedBox(height: 15),
+                          PaidInputWidget(controller: paidController),
+                          const SizedBox(height: 15),
+                          AmountDisplayWidget(
+                            label: 'المتبقي',
+                            amount: state.remainingAmount,
                             color: Colors.red,
-                            fontWeight: FontWeight.bold)),
-                  ],
-                ),
+                          ),
+                        ],
+                      )
+                    : Wrap(
+                        alignment: WrapAlignment.spaceBetween,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        spacing: 20,
+                        runSpacing: 15,
+                        children: [
+                          AmountDisplayWidget(
+                            label: 'الصافي',
+                            amount: state.grandTotal,
+                            color: Colors.green,
+                            fontSize: 20,
+                          ),
+                          PaidInputWidget(controller: paidController),
+                          AmountDisplayWidget(
+                            label: 'المتبقي',
+                            amount: state.remainingAmount,
+                            color: Colors.red,
+                          ),
+                        ],
+                      ),
+
                 const SizedBox(height: 25),
-                SizedBox(
-                  width: double.infinity,
-                  height: 50,
-                  child: ElevatedButton(
-                    onPressed: (state.isSubmitting || state.cart.isEmpty)
-                        ? null
-                        : () {
-                            context.read<SalesCubit>().submitInvoice(
-                                  contactId: '',
-                                  contactName: widget.contactController.text,
-                                  city: widget.cityController.text,
-                                );
-                          },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF2ECC71),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10)),
-                    ),
-                    child: state.isSubmitting
-                        ? const CircularProgressIndicator(color: Colors.white)
-                        : const Text('حفظ وإتمام عملية البيع ✅',
-                            style: TextStyle(
-                                fontSize: 18,
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold)),
-                  ),
+
+                // زر الحفظ
+                SubmitInvoiceButton(
+                  state: state,
+                  contactName: widget.contactController.text,
+                  city: widget.cityController.text,
                 ),
               ],
             ),

@@ -27,20 +27,21 @@ class AppSidebar extends StatelessWidget {
 
     return Material(
       color: Theme.of(context).cardColor,
-      child: Column(
-        children: [
-          // const _SidebarHeader(),
-          SidebarList(allowedItems: allowedItems),
-          const Divider(),
-          const ListTile(
-            leading: Icon(Icons.logout, color: Colors.red),
-            title: Text(
-              'تسجيل الخروج',
-              style: TextStyle(color: Colors.red),
+      child: Drawer(
+        child: Column(
+          children: [
+            SidebarList(allowedItems: allowedItems),
+            const Divider(),
+            const ListTile(
+              leading: Icon(Icons.logout, color: Colors.red),
+              title: Text(
+                'تسجيل الخروج',
+                style: TextStyle(color: Colors.red),
+              ),
             ),
-          ),
-          const SizedBox(height: 20),
-        ],
+            const SizedBox(height: 20),
+          ],
+        ),
       ),
     );
   }

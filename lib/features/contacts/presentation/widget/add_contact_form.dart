@@ -84,7 +84,6 @@ class _AddContactFormState extends State<AddContactForm> {
           ),
         );
 
-    // تفريغ الحقول بعد الإرسال
     nameController.clear();
     phoneController.clear();
     areaController.clear();
