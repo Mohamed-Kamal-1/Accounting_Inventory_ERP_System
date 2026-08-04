@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 
+import '../../../../contacts/domain/entities/contact_entity.dart'; // تأكد من المسار
 import '../../../../inventory/domain/entities/product_entity.dart';
 import '../../../domain/entities/sales_invoice_item_entity.dart';
 
@@ -18,6 +19,10 @@ class SalesState extends Equatable {
   final String submitError;
   final bool isSuccess;
 
+  // المتغيرات الجديدة للعملاء
+  final List<ContactEntity> filteredContacts;
+  final String selectedContactId;
+
   const SalesState({
     this.currentMode = 'merchant',
     this.cart = const [],
@@ -32,6 +37,8 @@ class SalesState extends Equatable {
     this.isSubmitting = false,
     this.submitError = '',
     this.isSuccess = false,
+    this.filteredContacts = const [],
+    this.selectedContactId = '',
   });
 
   SalesState copyWith({
@@ -48,6 +55,8 @@ class SalesState extends Equatable {
     bool? isSubmitting,
     String? submitError,
     bool? isSuccess,
+    List<ContactEntity>? filteredContacts,
+    String? selectedContactId,
   }) {
     return SalesState(
       currentMode: currentMode ?? this.currentMode,
@@ -64,6 +73,8 @@ class SalesState extends Equatable {
       isSubmitting: isSubmitting ?? this.isSubmitting,
       submitError: submitError ?? this.submitError,
       isSuccess: isSuccess ?? false,
+      filteredContacts: filteredContacts ?? this.filteredContacts,
+      selectedContactId: selectedContactId ?? this.selectedContactId,
     );
   }
 
@@ -82,5 +93,7 @@ class SalesState extends Equatable {
         isSubmitting,
         submitError,
         isSuccess,
+        filteredContacts,
+        selectedContactId,
       ];
 }

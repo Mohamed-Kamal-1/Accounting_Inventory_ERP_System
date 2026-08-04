@@ -31,7 +31,8 @@ class _SalesScreenState extends State<SalesScreen> {
   @override
   Widget build(BuildContext context) {
     return BlocProvider<SalesCubit>(
-      create: (context) => getIt.get<SalesCubit>()..fetchProducts(),
+      // 1. استدعاء initData لجلب كل البيانات دفعة واحدة
+      create: (context) => getIt.get<SalesCubit>()..initData(),
       child: BlocListener<SalesCubit, SalesState>(
         listenWhen: (previous, current) =>
             previous.isSuccess != current.isSuccess ||
@@ -70,6 +71,7 @@ class _SalesScreenState extends State<SalesScreen> {
                 const SizedBox(height: 20),
                 const SalesTabsWidget(),
                 const SizedBox(height: 20),
+                // تمرير الكنترولرز
                 CustomerInfoWidget(
                     contactController: contactController,
                     cityController: cityController),

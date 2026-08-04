@@ -1,17 +1,19 @@
 import 'package:accounting_desktop/features/reports_and_dashboard/view/widget/sidebar_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../core/utils/menu_items.dart';
 import '../../../auth/presentation/cubit/auth_cubit.dart';
 import '../../../auth/presentation/cubit/auth_state.dart';
 
 class AppSidebar extends StatelessWidget {
-  const AppSidebar({super.key});
+  final StatefulNavigationShell navigationShell;
+
+  const AppSidebar({super.key, required this.navigationShell});
 
   @override
   Widget build(BuildContext context) {
-    // استخدام read بدلاً من watch لمنع Rebuilds غير الضرورية من Cubit
     final authState = context.read<AuthCubit>().state;
 
     if (authState is! AuthSuccess) {
@@ -30,7 +32,10 @@ class AppSidebar extends StatelessWidget {
       child: Drawer(
         child: Column(
           children: [
-            SidebarList(allowedItems: allowedItems),
+            SidebarList(
+              allowedItems: allowedItems,
+              navigationShell: navigationShell,
+            ),
             const Divider(),
             const ListTile(
               leading: Icon(Icons.logout, color: Colors.red),

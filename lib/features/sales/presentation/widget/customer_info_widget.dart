@@ -1,4 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import '../../../contacts/domain/entities/contact_entity.dart';
+import '../view_model/cubit/sales_cubit.dart';
+import '../view_model/cubit/sales_invoice_state.dart';
 
 class CustomerInfoWidget extends StatelessWidget {
   final TextEditingController contactController;
@@ -12,38 +17,93 @@ class CustomerInfoWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Row(
-          children: [
-            Expanded(
-              flex: 2,
-              child: TextField(
-                controller: contactController,
-                decoration: const InputDecoration(
-                  labelText: 'اسم العميل / المندوب...',
-                  prefixIcon: Icon(Icons.search),
-                  border: OutlineInputBorder(),
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade300),
+      ),
+      child: Row(
+        children: [
+          // حقل البحث الديناميكي (Autocomplete)
+          Expanded(
+            flex: 2,
+            child: BlocBuilder<SalesCubit, SalesState>(
+              buildWhen: (previous, current) =>
+                  previous.filteredContacts != current.filteredContacts ||
+                  previous.currentMode != current.currentMode,
+              builder: (context, state) {
+                return Autocomplete<ContactEntity>(
+                  displayStringForOption: (ContactEntity option) => option.name,
+                  optionsBuilder: (TextEditingValue textEditingValue) {
+                    if (textEditingValue.text.isEmpty) {
+                      return const Iterable<ContactEntity>.empty();
+                    }
+                    return state.filteredContacts
+                        .where((ContactEntity contact) {
+                      return contact.name
+                          .toLowerCase()
+                          .contains(textEditingValue.text.toLowerCase());
+                    });
+                  },
+                  onSelected: (ContactEntity selection) {
+                    // 1. تحديث الكنترولر الخارجي بالاسم
+                    contactController.text = selection.name;
+                    // 2. التعبئة التلقائية للمدينة
+                    cityController.text = selection.area;
+                    // 3. إرسال الـ ID للـ Cubit
+                    context
+                        .read<SalesCubit>()
+                        .updateSelectedContact(selection.id);
+                  },
+                  fieldViewBuilder: (context, textEditingController, focusNode,
+                      onFieldSubmitted) {
+                    // ربط الكنترولر الداخلي بالكنترولر الخارجي
+                    textEditingController.addListener(() {
+                      contactController.text = textEditingController.text;
+                      if (textEditingController.text.isEmpty) {
+                        context.read<SalesCubit>().updateSelectedContact('');
+                        cityController.clear();
+                      }
+                    });
+
+                    return TextField(
+                      controller: textEditingController,
+                      focusNode: focusNode,
+                      decoration: InputDecoration(
+                        labelText: state.currentMode == 'merchant'
+                            ? 'اسم العميل'
+                            : (state.currentMode == 'salesman'
+                                ? 'اسم المندوب'
+                                : 'اسم المورد'),
+                        prefixIcon: const Icon(Icons.search),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+          const SizedBox(width: 16),
+          // حقل المدينة (يتم تعبئته تلقائياً أو يدوياً)
+          Expanded(
+            flex: 1,
+            child: TextField(
+              controller: cityController,
+              decoration: InputDecoration(
+                labelText: 'المدينة / المنطقة',
+                prefixIcon: const Icon(Icons.location_city),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
                 ),
               ),
             ),
-            const SizedBox(width: 15),
-            Expanded(
-              flex: 1,
-              child: TextField(
-                controller: cityController,
-                decoration: const InputDecoration(
-                  labelText: 'المدينة / المنطقة',
-                  prefixIcon: Icon(Icons.location_city),
-                  border: OutlineInputBorder(),
-                ),
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

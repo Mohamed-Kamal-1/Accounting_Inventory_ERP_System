@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:accounting_desktop/core/di/di.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -17,20 +18,27 @@ import 'app_routes.dart';
 class GoRouterRefreshStream extends ChangeNotifier {
   GoRouterRefreshStream(Stream<dynamic> stream) {
     notifyListeners();
+
     _subscription = stream.asBroadcastStream().listen(
           (dynamic _) => notifyListeners(),
         );
   }
+
   late final StreamSubscription<dynamic> _subscription;
+
   @override
   void dispose() {
     _subscription.cancel();
+
     super.dispose();
   }
 }
 
 class AppRouter {
-  static GoRouter createRouter(AuthCubit authCubit) {
+  static GoRouter createRouter() {
+    // 1. استدعاء Cubit مباشرة من GetIt بدلاً من تمريره
+    final authCubit = getIt.get<AuthCubit>();
+
     return GoRouter(
       initialLocation: AppRoute.splash,
       refreshListenable: GoRouterRefreshStream(authCubit.stream),
@@ -50,11 +58,22 @@ class AppRouter {
             return AppRoute.dashboard;
           }
         }
-
         return null;
       },
       errorBuilder: (context, state) => Scaffold(
-        body: Center(child: Text('المسار غير موجود: ${state.uri.toString()}')),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text('المسار غير موجود: ${state.uri.toString()}'),
+              ElevatedButton(
+                // تصحيح كارثة context.pop() السابقة
+                onPressed: () => context.go(AppRoute.dashboard),
+                child: const Text('العودة للرئيسية'),
+              )
+            ],
+          ),
+        ),
       ),
       routes: [
         GoRoute(
@@ -65,30 +84,57 @@ class AppRouter {
           path: AppRoute.login,
           builder: (context, state) => const LoginScreen(),
         ),
-        ShellRoute(
-          builder: (context, state, child) {
-            return MainLayout(child: child);
+
+        // 2. تطبيق StatefulShellRoute لمنع فقدان البيانات
+        StatefulShellRoute.indexedStack(
+          builder: (context, state, navigationShell) {
+            // تمرير navigationShell للـ Layout بدلاً من child
+            return MainLayout(navigationShell: navigationShell);
           },
-          routes: [
-            GoRoute(
-              path: AppRoute.dashboard,
-              pageBuilder: (context, state) => NoTransitionPage(
-                  key: state.pageKey, child: const DashboardScreen()),
+          branches: [
+            // الفرع الأول: لوحة التحكم
+            StatefulShellBranch(
+              routes: [
+                GoRoute(
+                  path: AppRoute.dashboard,
+                  pageBuilder: (context, state) => const NoTransitionPage(
+                    child: DashboardScreen(),
+                  ),
+                ),
+              ],
             ),
-            GoRoute(
-              path: AppRoute.sales,
-              pageBuilder: (context, state) => NoTransitionPage(
-                  key: state.pageKey, child: const SalesScreen()),
+            // الفرع الثاني: المبيعات
+            StatefulShellBranch(
+              routes: [
+                GoRoute(
+                  path: AppRoute.sales,
+                  pageBuilder: (context, state) => const NoTransitionPage(
+                    child: SalesScreen(),
+                  ),
+                ),
+              ],
             ),
-            GoRoute(
-              path: AppRoute.contacts,
-              pageBuilder: (context, state) => NoTransitionPage(
-                  key: state.pageKey, child: const ContactsScreen()),
+            // الفرع الثالث: جهات الاتصال
+            StatefulShellBranch(
+              routes: [
+                GoRoute(
+                  path: AppRoute.contacts,
+                  pageBuilder: (context, state) => const NoTransitionPage(
+                    child: ContactsScreen(),
+                  ),
+                ),
+              ],
             ),
-            GoRoute(
-              path: AppRoute.inventory,
-              pageBuilder: (context, state) => NoTransitionPage(
-                  key: state.pageKey, child: const InventoryScreen()),
+            // الفرع الرابع: المخازن
+            StatefulShellBranch(
+              routes: [
+                GoRoute(
+                  path: AppRoute.inventory,
+                  pageBuilder: (context, state) => const NoTransitionPage(
+                    child: InventoryScreen(),
+                  ),
+                ),
+              ],
             ),
           ],
         ),

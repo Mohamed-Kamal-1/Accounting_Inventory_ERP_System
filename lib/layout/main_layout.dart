@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../features/reports_and_dashboard/view/widget/app_sidebar.dart';
 
 class MainLayout extends StatelessWidget {
-  final Widget child;
+  final StatefulNavigationShell navigationShell;
 
   const MainLayout({
     super.key,
-    required this.child,
+    required this.navigationShell,
   });
 
   @override
@@ -16,7 +17,9 @@ class MainLayout extends StatelessWidget {
     return Scaffold(
       drawer: (isMobile)
           ? Drawer(
-              child: AppSidebar(),
+              child: AppSidebar(
+                navigationShell: navigationShell,
+              ),
             )
           : null,
       appBar: (isMobile) ? AppBar() : null,
@@ -26,15 +29,17 @@ class MainLayout extends StatelessWidget {
         children: [
           Visibility(
             visible: !isMobile,
-            child: const SizedBox(
+            child: SizedBox(
               width: 250,
-              child: AppSidebar(),
+              child: AppSidebar(
+                navigationShell: navigationShell,
+              ),
             ),
           ),
           Expanded(
             child: Container(
               color: const Color(0xFFF4F7F6),
-              child: child,
+              child: navigationShell,
             ),
           ),
         ],

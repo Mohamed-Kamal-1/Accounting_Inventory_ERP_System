@@ -1,51 +1,83 @@
-import 'package:accounting_desktop/features/sales/presentation/view_model/cubit/sales_invoice_state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 
+import '../../../../contacts/domain/entities/contact_entity.dart'; // تأكد من المسار
+import '../../../../contacts/domain/repositories/contacts_repository.dart'; // تأكد من المسار
 import '../../../../inventory/domain/repositories/inventory_repository.dart';
 import '../../../domain/entities/sale_invoice_entity.dart';
 import '../../../domain/entities/sales_invoice_item_entity.dart';
+import 'sales_invoice_state.dart';
 
 @injectable
 class SalesCubit extends Cubit<SalesState> {
   final InventoryRepository _inventoryRepository;
+  final ContactsRepository _contactsRepository; // 1. حقن الريبوزيتوري
 
-  SalesCubit(this._inventoryRepository) : super(const SalesState());
+  List<ContactEntity> _allContacts = []; // قائمة بالكاش
 
-  // 1. جلب المنتجات
+  SalesCubit(this._inventoryRepository, this._contactsRepository)
+      : super(const SalesState());
+
+  // دالة مجمعة للتهيئة
+  Future<void> initData() async {
+    await fetchProducts();
+    await fetchContacts();
+  }
+
   Future<void> fetchProducts() async {
     emit(state.copyWith(isLoadingProducts: true, productsError: ''));
-
     final result = await _inventoryRepository.getProducts();
+    result.fold(
+      onFailure: (failure) => emit(state.copyWith(
+          isLoadingProducts: false, productsError: failure.message)),
+      onSuccess: (products) => emit(state.copyWith(
+          isLoadingProducts: false, availableProducts: products)),
+    );
+  }
 
+  // جلب جهات الاتصال
+  Future<void> fetchContacts() async {
+    final result = await _contactsRepository.getContacts();
     result.fold(
       onFailure: (failure) {
-        emit(state.copyWith(
-          isLoadingProducts: false,
-          productsError: failure.message,
-        ));
+        // يمكن إضافة معالجة للخطأ هنا
       },
-      onSuccess: (products) {
-        emit(state.copyWith(
-          isLoadingProducts: false,
-          availableProducts: products,
-        ));
+      onSuccess: (contacts) {
+        _allContacts = contacts;
+        _filterContactsByMode(state.currentMode);
       },
     );
   }
 
-  // 2. تغيير التبويب
   void changeMode(String mode) {
     emit(state.copyWith(
       currentMode: mode,
-      cart: [], // تفريغ السلة منطقياً عند تغيير نوع المعاملة
+      cart: [],
       subTotal: 0.0,
       grandTotal: 0.0,
       remainingAmount: 0.0,
+      selectedContactId: '', // تصفير العميل عند تغيير النوع
     ));
+    _filterContactsByMode(mode);
   }
 
-  // 3. إضافة صنف للجدول
+  void _filterContactsByMode(String mode) {
+    List<ContactEntity> filtered = [];
+    if (mode == 'merchant') {
+      filtered = _allContacts.where((c) => c.type == 'merchant').toList();
+    } else if (mode == 'salesman') {
+      filtered = _allContacts.where((c) => c.type == 'sales').toList();
+    } else if (mode == 'supplier') {
+      filtered = _allContacts.where((c) => c.type == 'supplier').toList();
+    }
+    emit(state.copyWith(filteredContacts: filtered));
+  }
+
+  void updateSelectedContact(String contactId) {
+    emit(state.copyWith(selectedContactId: contactId));
+  }
+
+  // باقي الدوال (addItemToCart, removeItemFromCart, updateDiscount, updatePaidAmount, _calculateTotals) كما هي تماماً بدون تغيير...
   void addItemToCart(String pId, String pName, double price, int qty) {
     final List<SaleInvoiceItemEntity> currentCart = List.from(state.cart);
     final existingIndex =
@@ -72,37 +104,27 @@ class SalesCubit extends Cubit<SalesState> {
         total: price * qty,
       ));
     }
-
     _calculateTotals(newCart: currentCart);
   }
 
-  // 4. إزالة صنف من الجدول
   void removeItemFromCart(int index) {
     final List<SaleInvoiceItemEntity> currentCart = List.from(state.cart);
     currentCart.removeAt(index);
     _calculateTotals(newCart: currentCart);
   }
 
-  // 5. تحديث نسبة الخصم
-  void updateDiscount(double discount) {
-    _calculateTotals(newDiscount: discount);
-  }
+  void updateDiscount(double discount) =>
+      _calculateTotals(newDiscount: discount);
+  void updatePaidAmount(double paidAmount) =>
+      _calculateTotals(newPaidAmount: paidAmount);
 
-  // 6. تحديث المبلغ المدفوع
-  void updatePaidAmount(double paidAmount) {
-    _calculateTotals(newPaidAmount: paidAmount);
-  }
-
-  // حساب الإجماليات
-  void _calculateTotals({
-    List<SaleInvoiceItemEntity>? newCart,
-    double? newDiscount,
-    double? newPaidAmount,
-  }) {
+  void _calculateTotals(
+      {List<SaleInvoiceItemEntity>? newCart,
+      double? newDiscount,
+      double? newPaidAmount}) {
     final cart = newCart ?? state.cart;
     final discount = newDiscount ?? state.invoiceDiscountPercent;
     final paid = newPaidAmount ?? state.paidAmount;
-
     final subTotal = cart.fold(0.0, (sum, item) => sum + item.total);
     final grandTotal = subTotal - (subTotal * (discount / 100));
     final remainingAmount = grandTotal - paid;
@@ -117,23 +139,25 @@ class SalesCubit extends Cubit<SalesState> {
     ));
   }
 
-  // 7. حفظ الفاتورة
-  Future<void> submitInvoice({
-    required String contactId,
-    required String contactName,
-    required String city,
-  }) async {
+  Future<void> submitInvoice(
+      {required String contactId,
+      required String contactName,
+      required String city}) async {
     if (state.cart.isEmpty) {
       emit(state.copyWith(submitError: 'السلة فارغة. يرجى إضافة أصناف.'));
-      // إعادة تصفير الخطأ حتى لا يعلق
       emit(state.copyWith(submitError: ''));
       return;
     }
 
     emit(state.copyWith(isSubmitting: true, submitError: ''));
 
+    // نستخدم ID العميل من הـ state الذي تم تحديثه عبر الـ Autocomplete
+    final finalContactId = state.selectedContactId.isNotEmpty
+        ? state.selectedContactId
+        : (contactId.isEmpty ? 'dummy_id' : contactId);
+
     final invoice = SaleInvoiceEntity(
-      contactId: contactId.isEmpty ? 'dummy_id' : contactId,
+      contactId: finalContactId,
       contactName: contactName,
       mode: state.currentMode,
       date: DateTime.now(),
@@ -148,9 +172,7 @@ class SalesCubit extends Cubit<SalesState> {
     );
 
     try {
-      // محاكاة الإرسال لقاعدة البيانات (استبدلها لاحقاً بالـ UseCase الخاص بك)
       await Future.delayed(const Duration(seconds: 1));
-
       _handleSuccess();
     } catch (e) {
       emit(state.copyWith(
@@ -158,7 +180,6 @@ class SalesCubit extends Cubit<SalesState> {
     }
   }
 
-  // تفريغ الفاتورة بعد النجاح
   void _handleSuccess() {
     emit(state.copyWith(
       isSubmitting: false,
@@ -169,9 +190,8 @@ class SalesCubit extends Cubit<SalesState> {
       remainingAmount: 0.0,
       paidAmount: 0.0,
       invoiceDiscountPercent: 0.0,
+      selectedContactId: '',
     ));
-
-    // إعادة الـ isSuccess إلى false حتى لا تظهر رسالة النجاح مراراً
     emit(state.copyWith(isSuccess: false));
   }
 }

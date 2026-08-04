@@ -5,10 +5,12 @@ import '../../../../core/utils/menu_items.dart';
 
 class SidebarListTile extends StatelessWidget {
   final SidebarItem item;
+  final StatefulNavigationShell navigationShell; // استقبال
 
   const SidebarListTile({
     super.key,
     required this.item,
+    required this.navigationShell,
   });
 
   @override
@@ -32,7 +34,12 @@ class SidebarListTile extends StatelessWidget {
       selectedTileColor: Colors.blue.withValues(alpha: 0.1),
       onTap: () {
         if (!isActive) {
-          context.go(item.route);
+          // التنقل الصحيح الذي يحافظ على حالة الشاشات
+          navigationShell.goBranch(
+            item.branchIndex,
+            // هذا السطر يمنع إعادة تشغيل الفرع إذا ضغطت عليه مرة أخرى
+            initialLocation: item.branchIndex == navigationShell.currentIndex,
+          );
         }
       },
     );

@@ -160,12 +160,10 @@ extension GetItInjectableX on _i174.GetIt {
         () => _i1015.GetDashboardStatsUseCase(gh<_i959.ReportsRepository>()));
     gh.factory<_i422.InventoryRepository>(() =>
         _i572.InventoryRepositoryImpl(gh<_i103.InventoryRemoteDataSource>()));
-    gh.factory<_i117.AuthCubit>(() => _i117.AuthCubit(
+    gh.lazySingleton<_i117.AuthCubit>(() => _i117.AuthCubit(
           gh<_i188.LoginUseCase>(),
           gh<_i787.AuthRepository>(),
         ));
-    gh.factory<_i228.SalesCubit>(
-        () => _i228.SalesCubit(gh<_i422.InventoryRepository>()));
     gh.factory<_i115.CustodyCubit>(
         () => _i115.CustodyCubit(gh<_i422.InventoryRepository>()));
     gh.factory<_i431.GetCategoriesUseCase>(
@@ -195,6 +193,10 @@ extension GetItInjectableX on _i174.GetIt {
           gh<_i313.AddAccountUseCase>(),
           gh<_i1063.DeleteAccountUseCase>(),
           gh<_i663.SearchAccountsUseCase>(),
+        ));
+    gh.factory<_i228.SalesCubit>(() => _i228.SalesCubit(
+          gh<_i422.InventoryRepository>(),
+          gh<_i909.ContactsRepository>(),
         ));
     gh.factory<_i793.ReportsCubit>(
         () => _i793.ReportsCubit(gh<_i1015.GetDashboardStatsUseCase>()));
