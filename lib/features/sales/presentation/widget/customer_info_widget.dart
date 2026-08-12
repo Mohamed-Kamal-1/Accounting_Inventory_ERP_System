@@ -26,7 +26,6 @@ class CustomerInfoWidget extends StatelessWidget {
       ),
       child: Row(
         children: [
-          // حقل البحث الديناميكي (Autocomplete)
           Expanded(
             flex: 2,
             child: BlocBuilder<SalesCubit, SalesState>(
@@ -35,6 +34,7 @@ class CustomerInfoWidget extends StatelessWidget {
                   previous.currentMode != current.currentMode,
               builder: (context, state) {
                 return Autocomplete<ContactEntity>(
+                  key: ValueKey(state.currentMode),
                   displayStringForOption: (ContactEntity option) => option.name,
                   optionsBuilder: (TextEditingValue textEditingValue) {
                     if (textEditingValue.text.isEmpty) {
@@ -48,18 +48,14 @@ class CustomerInfoWidget extends StatelessWidget {
                     });
                   },
                   onSelected: (ContactEntity selection) {
-                    // 1. تحديث الكنترولر الخارجي بالاسم
                     contactController.text = selection.name;
-                    // 2. التعبئة التلقائية للمدينة
                     cityController.text = selection.area;
-                    // 3. إرسال الـ ID للـ Cubit
                     context
                         .read<SalesCubit>()
                         .updateSelectedContact(selection.id);
                   },
                   fieldViewBuilder: (context, textEditingController, focusNode,
                       onFieldSubmitted) {
-                    // ربط الكنترولر الداخلي بالكنترولر الخارجي
                     textEditingController.addListener(() {
                       contactController.text = textEditingController.text;
                       if (textEditingController.text.isEmpty) {
@@ -73,7 +69,7 @@ class CustomerInfoWidget extends StatelessWidget {
                       focusNode: focusNode,
                       decoration: InputDecoration(
                         labelText: state.currentMode == 'merchant'
-                            ? 'اسم العميل'
+                            ? 'اسم العميل / التاجر'
                             : (state.currentMode == 'salesman'
                                 ? 'اسم المندوب'
                                 : 'اسم المورد'),
@@ -89,7 +85,6 @@ class CustomerInfoWidget extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 16),
-          // حقل المدينة (يتم تعبئته تلقائياً أو يدوياً)
           Expanded(
             flex: 1,
             child: TextField(

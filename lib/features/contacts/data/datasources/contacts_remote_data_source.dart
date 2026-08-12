@@ -10,7 +10,6 @@ class ContactsRemoteDataSourceImpl {
 
   ContactsRemoteDataSourceImpl(this.supabaseClient);
 
-  @override
   Future<List<ContactModel>> getContacts() async {
     try {
       final response = await supabaseClient
@@ -25,7 +24,6 @@ class ContactsRemoteDataSourceImpl {
     }
   }
 
-  @override
   Future<void> addContact(ContactModel contact,
       {String? email, String? password}) async {
     try {
@@ -63,7 +61,6 @@ class ContactsRemoteDataSourceImpl {
     }
   }
 
-  @override
   Future<void> deleteContact(String id) async {
     try {
       await supabaseClient.from('contacts').delete().eq('id', id);
@@ -72,7 +69,6 @@ class ContactsRemoteDataSourceImpl {
     }
   }
 
-  @override
   Future<void> updateContact(ContactModel contact) async {
     try {
       // نحن نعدل البيانات الأساسية فقط، ولا نعدل الرصيد الافتتاحي أو النوع لتجنب الكوارث المحاسبية

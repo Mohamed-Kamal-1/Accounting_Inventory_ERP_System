@@ -23,6 +23,7 @@ class ContactsBloc extends Bloc<ContactsEvent, ContactsState> {
   ) : super(ContactsInitial()) {
     on<LoadContactsEvent>(_onLoadContacts);
     on<AddContactEvent>(_onAddContact);
+
     on<DeleteContactEvent>(_onDeleteContact);
     on<UpdateContactEvent>(_onUpdateContact);
     on<SearchContactsEvent>(_onSearchContacts);

@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-import '../../../../contacts/domain/entities/contact_entity.dart'; // تأكد من المسار
+import '../../../../contacts/domain/entities/contact_entity.dart';
 import '../../../../inventory/domain/entities/product_entity.dart';
 import '../../../domain/entities/sales_invoice_item_entity.dart';
 
@@ -18,8 +18,6 @@ class SalesState extends Equatable {
   final bool isSubmitting;
   final String submitError;
   final bool isSuccess;
-
-  // المتغيرات الجديدة للعملاء
   final List<ContactEntity> filteredContacts;
   final String selectedContactId;
 

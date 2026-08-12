@@ -1,24 +1,25 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../../../../contacts/domain/entities/contact_entity.dart'; // تأكد من المسار
-import '../../../../contacts/domain/repositories/contacts_repository.dart'; // تأكد من المسار
+import '../../../../../core/di/di.dart';
+import '../../../../contacts/domain/entities/contact_entity.dart';
+import '../../../../contacts/domain/repositories/contacts_repository.dart';
 import '../../../../inventory/domain/repositories/inventory_repository.dart';
-import '../../../domain/entities/sale_invoice_entity.dart';
 import '../../../domain/entities/sales_invoice_item_entity.dart';
 import 'sales_invoice_state.dart';
 
 @injectable
 class SalesCubit extends Cubit<SalesState> {
   final InventoryRepository _inventoryRepository;
-  final ContactsRepository _contactsRepository; // 1. حقن الريبوزيتوري
+  final ContactsRepository _contactsRepository;
 
-  List<ContactEntity> _allContacts = []; // قائمة بالكاش
+  List<ContactEntity> _allContacts = [];
 
   SalesCubit(this._inventoryRepository, this._contactsRepository)
       : super(const SalesState());
 
-  // دالة مجمعة للتهيئة
   Future<void> initData() async {
     await fetchProducts();
     await fetchContacts();
@@ -35,13 +36,10 @@ class SalesCubit extends Cubit<SalesState> {
     );
   }
 
-  // جلب جهات الاتصال
   Future<void> fetchContacts() async {
     final result = await _contactsRepository.getContacts();
     result.fold(
-      onFailure: (failure) {
-        // يمكن إضافة معالجة للخطأ هنا
-      },
+      onFailure: (failure) {},
       onSuccess: (contacts) {
         _allContacts = contacts;
         _filterContactsByMode(state.currentMode);
@@ -56,7 +54,7 @@ class SalesCubit extends Cubit<SalesState> {
       subTotal: 0.0,
       grandTotal: 0.0,
       remainingAmount: 0.0,
-      selectedContactId: '', // تصفير العميل عند تغيير النوع
+      selectedContactId: '',
     ));
     _filterContactsByMode(mode);
   }
@@ -64,11 +62,20 @@ class SalesCubit extends Cubit<SalesState> {
   void _filterContactsByMode(String mode) {
     List<ContactEntity> filtered = [];
     if (mode == 'merchant') {
-      filtered = _allContacts.where((c) => c.type == 'merchant').toList();
+      filtered = _allContacts.where((c) {
+        final t = c.type.trim().toLowerCase();
+        return t == 'merchant' || t == 'تاجر' || t == 'عميل' || t == 'client';
+      }).toList();
     } else if (mode == 'salesman') {
-      filtered = _allContacts.where((c) => c.type == 'sales').toList();
+      filtered = _allContacts.where((c) {
+        final t = c.type.trim().toLowerCase();
+        return t == 'sales  ' || t == 'salesman' || t == 'مندوب';
+      }).toList();
     } else if (mode == 'supplier') {
-      filtered = _allContacts.where((c) => c.type == 'supplier').toList();
+      filtered = _allContacts.where((c) {
+        final t = c.type.trim().toLowerCase();
+        return t == 'supplier' || t == 'مورد';
+      }).toList();
     }
     emit(state.copyWith(filteredContacts: filtered));
   }
@@ -77,7 +84,6 @@ class SalesCubit extends Cubit<SalesState> {
     emit(state.copyWith(selectedContactId: contactId));
   }
 
-  // باقي الدوال (addItemToCart, removeItemFromCart, updateDiscount, updatePaidAmount, _calculateTotals) كما هي تماماً بدون تغيير...
   void addItemToCart(String pId, String pName, double price, int qty) {
     final List<SaleInvoiceItemEntity> currentCart = List.from(state.cart);
     final existingIndex =
@@ -115,6 +121,7 @@ class SalesCubit extends Cubit<SalesState> {
 
   void updateDiscount(double discount) =>
       _calculateTotals(newDiscount: discount);
+
   void updatePaidAmount(double paidAmount) =>
       _calculateTotals(newPaidAmount: paidAmount);
 
@@ -139,44 +146,57 @@ class SalesCubit extends Cubit<SalesState> {
     ));
   }
 
-  Future<void> submitInvoice(
-      {required String contactId,
-      required String contactName,
-      required String city}) async {
+  Future<void> submitInvoice({
+    required String contactId,
+    required String contactName,
+    required String city,
+  }) async {
     if (state.cart.isEmpty) {
       emit(state.copyWith(submitError: 'السلة فارغة. يرجى إضافة أصناف.'));
       emit(state.copyWith(submitError: ''));
       return;
     }
 
+    final finalContactId = state.selectedContactId;
+    if (finalContactId.isEmpty) {
+      emit(state.copyWith(
+          submitError: 'يرجى اختيار جهة اتصال صحيحة من القائمة.'));
+      emit(state.copyWith(submitError: ''));
+      return;
+    }
+
     emit(state.copyWith(isSubmitting: true, submitError: ''));
 
-    // نستخدم ID العميل من הـ state الذي تم تحديثه عبر الـ Autocomplete
-    final finalContactId = state.selectedContactId.isNotEmpty
-        ? state.selectedContactId
-        : (contactId.isEmpty ? 'dummy_id' : contactId);
-
-    final invoice = SaleInvoiceEntity(
-      contactId: finalContactId,
-      contactName: contactName,
-      mode: state.currentMode,
-      date: DateTime.now(),
-      city: city,
-      lineName: '',
-      items: state.cart,
-      subTotal: state.subTotal,
-      invoiceDiscountPercent: state.invoiceDiscountPercent,
-      grandTotal: state.grandTotal,
-      paidAmount: state.paidAmount,
-      remainingAmount: state.remainingAmount,
-    );
-
     try {
-      await Future.delayed(const Duration(seconds: 1));
+      final itemsJson = state.cart
+          .map((item) => {
+                'product_id': item.productId,
+                'quantity': item.quantity,
+                'unit_price': item.unitPrice,
+              })
+          .toList();
+
+      await getIt.get<SupabaseClient>().rpc(
+        'process_sales_invoice',
+        params: {
+          'p_contact_id': finalContactId,
+          'p_mode': state.currentMode,
+          'p_sub_total': state.subTotal,
+          'p_discount': state.invoiceDiscountPercent,
+          'p_grand_total': state.grandTotal,
+          'p_paid_amount': state.paidAmount,
+          'p_remaining_amount': state.remainingAmount,
+          'p_items': itemsJson,
+        },
+      );
+
       _handleSuccess();
     } catch (e) {
+      debugPrint('Invoice Submit Error: $e');
       emit(state.copyWith(
-          isSubmitting: false, submitError: 'حدث خطأ غير متوقع أثناء الحفظ'));
+          isSubmitting: false,
+          submitError:
+              'فشل حفظ الفاتورة: تأكد من صحة البيانات أو اتصال الإنترنت'));
     }
   }
 
