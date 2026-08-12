@@ -15,14 +15,44 @@ class CustomerInfoWidget extends StatelessWidget {
     required this.cityController,
   });
 
+  // 💡 تصميم موحد وحديث لحقول الإدخال
+  InputDecoration _modernInputDecoration(String label, IconData icon) {
+    return InputDecoration(
+      labelText: label,
+      labelStyle: TextStyle(color: Colors.grey.shade600, fontSize: 14),
+      prefixIcon: Icon(icon, color: Colors.blueAccent.shade200, size: 20),
+      filled: true,
+      fillColor: const Color(0xFFF8FAFC), // Slate 50
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide.none,
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide.none,
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Colors.blueAccent, width: 1.5),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade300),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 15,
+            offset: const Offset(0, 5),
+          ),
+        ],
       ),
       child: Row(
         children: [
@@ -67,16 +97,16 @@ class CustomerInfoWidget extends StatelessWidget {
                     return TextField(
                       controller: textEditingController,
                       focusNode: focusNode,
-                      decoration: InputDecoration(
-                        labelText: state.currentMode == 'merchant'
+                      onTap: () {
+                        context.read<SalesCubit>().fetchContacts();
+                      },
+                      decoration: _modernInputDecoration(
+                        state.currentMode == 'merchant'
                             ? 'اسم العميل / التاجر'
                             : (state.currentMode == 'salesman'
                                 ? 'اسم المندوب'
                                 : 'اسم المورد'),
-                        prefixIcon: const Icon(Icons.search),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
+                        Icons.person_search_rounded,
                       ),
                     );
                   },
@@ -89,13 +119,8 @@ class CustomerInfoWidget extends StatelessWidget {
             flex: 1,
             child: TextField(
               controller: cityController,
-              decoration: InputDecoration(
-                labelText: 'المدينة / المنطقة',
-                prefixIcon: const Icon(Icons.location_city),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
+              decoration: _modernInputDecoration(
+                  'المدينة / المنطقة', Icons.location_on_rounded),
             ),
           ),
         ],

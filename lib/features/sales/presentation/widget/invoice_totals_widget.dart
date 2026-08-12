@@ -14,6 +14,22 @@ class InvoiceTotalsWidget extends StatelessWidget {
     required this.cityController,
   });
 
+  InputDecoration _smallInputDecoration() {
+    return InputDecoration(
+      filled: true,
+      fillColor: const Color(0xFFF8FAFC),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(8),
+        borderSide: BorderSide.none,
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(8),
+        borderSide: const BorderSide(color: Colors.blueAccent, width: 1),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<SalesCubit, SalesState>(
@@ -21,11 +37,17 @@ class InvoiceTotalsWidget extends StatelessWidget {
         final isSalesman = state.currentMode == 'salesman';
 
         return Container(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.grey.shade300),
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.04),
+                blurRadius: 20,
+                offset: const Offset(0, 10),
+              ),
+            ],
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -33,78 +55,121 @@ class InvoiceTotalsWidget extends StatelessWidget {
               if (!isSalesman)
                 Row(
                   children: [
-                    const Text('خصم %:',
-                        style: TextStyle(fontWeight: FontWeight.bold)),
-                    const SizedBox(width: 10),
+                    const Text('خصم % :',
+                        style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            color: Colors.black87)),
+                    const SizedBox(width: 12),
                     SizedBox(
                       width: 100,
                       child: TextField(
-                        keyboardType: TextInputType.number,
-                        decoration: const InputDecoration(
-                          border: OutlineInputBorder(),
-                          contentPadding:
-                              EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-                        ),
+                        keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true),
+                        decoration: _smallInputDecoration(),
                         onChanged: (value) {
+                          // إرسال قيمة الخصم للـ Cubit
                           final discount = double.tryParse(value) ?? 0.0;
                           context.read<SalesCubit>().updateDiscount(discount);
                         },
                       ),
                     ),
                     const Spacer(),
-                    Text('الإجمالي: ${state.subTotal.toStringAsFixed(2)} ج.م',
-                        style: const TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 16)),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        const Text('الإجمالي',
+                            style: TextStyle(fontSize: 12, color: Colors.grey)),
+                        Text('${state.subTotal.toStringAsFixed(2)} ج.م',
+                            style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 18,
+                                color: Colors.black87)),
+                      ],
+                    )
                   ],
                 ),
-              if (!isSalesman) const SizedBox(height: 16),
+              if (!isSalesman)
+                const Divider(height: 30, color: Color(0xFFF1F5F9)),
               Row(
                 children: [
-                  Text('الصافي: ${state.grandTotal.toStringAsFixed(2)} ج.م',
-                      style: const TextStyle(
-                          color: Colors.green,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16)),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text('الصافي النهائي',
+                          style: TextStyle(fontSize: 13, color: Colors.grey)),
+                      Text('${state.grandTotal.toStringAsFixed(2)} ج.م',
+                          style: const TextStyle(
+                              color: Color(0xFF10B981),
+                              fontWeight: FontWeight.w900,
+                              fontSize: 24)),
+                    ],
+                  ),
                   const Spacer(),
                   if (!isSalesman) ...[
-                    const Text('المدفوع:'),
-                    const SizedBox(width: 10),
+                    const Text('المدفوع :',
+                        style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            color: Colors.black87)),
+                    const SizedBox(width: 12),
                     SizedBox(
-                      width: 100,
+                      width: 120,
                       child: TextField(
-                        keyboardType: TextInputType.number,
-                        decoration: const InputDecoration(
-                          border: OutlineInputBorder(),
-                          contentPadding:
-                              EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-                        ),
+                        keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true),
+                        decoration: _smallInputDecoration(),
                         onChanged: (value) {
+                          // إرسال المبلغ المدفوع للـ Cubit (والذي يتكفل بالتحقق المالي)
                           final paid = double.tryParse(value) ?? 0.0;
                           context.read<SalesCubit>().updatePaidAmount(paid);
                         },
                       ),
                     ),
-                    const SizedBox(width: 20),
-                    Text(
-                        'المتبقي: ${state.remainingAmount.toStringAsFixed(2)} ج.م',
-                        style: const TextStyle(
-                            color: Colors.red,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16)),
+                    const SizedBox(width: 24),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        const Text('المتبقي (آجل)',
+                            style: TextStyle(fontSize: 12, color: Colors.grey)),
+                        Text('${state.remainingAmount.toStringAsFixed(2)} ج.م',
+                            style: const TextStyle(
+                                color: Color(0xFFEF4444),
+                                fontWeight: FontWeight.bold,
+                                fontSize: 18)),
+                      ],
+                    ),
                   ] else ...[
-                    const Text('📦 معاملة نقل عهدة (لا توجد حسابات مالية)',
-                        style: TextStyle(
-                            color: Colors.blue, fontWeight: FontWeight.bold)),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: Colors.blue.shade50,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Row(
+                        children: [
+                          Icon(Icons.info_outline,
+                              color: Colors.blue, size: 20),
+                          SizedBox(width: 8),
+                          Text('معاملة نقل عهدة (لا توجد حسابات مالية)',
+                              style: TextStyle(
+                                  color: Colors.blue,
+                                  fontWeight: FontWeight.bold)),
+                        ],
+                      ),
+                    ),
                   ],
                 ],
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 32),
               SizedBox(
                 width: double.infinity,
+                height: 56,
                 child: ElevatedButton.icon(
+                  // تعطيل الضغط في حالة التحميل أو جاري الإرسال لمنع التكرار
                   onPressed: state.isSubmitting
                       ? null
                       : () {
+                          // استدعاء دالة تقديم الفاتورة بالبيانات المجمعة
                           context.read<SalesCubit>().submitInvoice(
                                 contactId: state.selectedContactId,
                                 contactName: contactController.text,
@@ -112,24 +177,27 @@ class InvoiceTotalsWidget extends StatelessWidget {
                               );
                         },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    backgroundColor: const Color(0xFF10B981),
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
                   icon: state.isSubmitting
                       ? const SizedBox(
-                          width: 20,
-                          height: 20,
+                          width: 24,
+                          height: 24,
                           child: CircularProgressIndicator(
                               color: Colors.white, strokeWidth: 2))
-                      : const Icon(Icons.check_box, color: Colors.white),
+                      : const Icon(Icons.check_circle_outline_rounded,
+                          size: 26),
                   label: Text(
                     state.isSubmitting
                         ? 'جاري الحفظ...'
                         : 'حفظ وإتمام عملية البيع',
                     style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white),
+                        fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                 ),
               ),
