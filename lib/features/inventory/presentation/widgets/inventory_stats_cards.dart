@@ -14,16 +14,40 @@ class InventoryStatsCards extends StatelessWidget {
 
     return Row(
       children: [
-        _buildCard('إجمالي الأصناف', totalProducts.toString(),
-            Icons.inventory_2, Colors.blue),
+        StatCardWidget(
+          title: 'إجمالي الأصناف',
+          value: totalProducts.toString(),
+          icon: Icons.inventory_2,
+          color: Colors.blue,
+        ),
         const SizedBox(width: 15),
-        _buildCard('الأقسام النشطة', totalCategories.toString(), Icons.category,
-            Colors.orange),
+        StatCardWidget(
+          title: 'الأقسام النشطة',
+          value: totalCategories.toString(),
+          icon: Icons.category,
+          color: Colors.orange,
+        ),
       ],
     );
   }
+}
 
-  Widget _buildCard(String title, String value, IconData icon, Color color) {
+class StatCardWidget extends StatelessWidget {
+  final String title;
+  final String value;
+  final IconData icon;
+  final Color color;
+
+  const StatCardWidget({
+    super.key,
+    required this.title,
+    required this.value,
+    required this.icon,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return Expanded(
       child: Card(
         elevation: 2,
@@ -40,11 +64,15 @@ class InventoryStatsCards extends StatelessWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title,
-                      style: const TextStyle(color: Colors.grey, fontSize: 13)),
-                  Text(value,
-                      style: const TextStyle(
-                          fontSize: 20, fontWeight: FontWeight.bold)),
+                  Text(
+                    title,
+                    style: const TextStyle(color: Colors.grey, fontSize: 13),
+                  ),
+                  Text(
+                    value,
+                    style: const TextStyle(
+                        fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
                 ],
               ),
             ],
