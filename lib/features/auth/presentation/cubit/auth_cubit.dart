@@ -1,3 +1,4 @@
+import 'package:accounting_desktop/features/auth/domain/usecases/logout_usecase.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' hide AuthState;
@@ -9,9 +10,11 @@ import 'auth_state.dart';
 @lazySingleton
 class AuthCubit extends Cubit<AuthState> {
   final LoginUseCase _loginUseCase;
+  final LogoutUseCase _logoutUseCase;
   final AuthRepository _authRepository;
 
-  AuthCubit(this._loginUseCase, this._authRepository) : super(AuthInitial());
+  AuthCubit(this._loginUseCase, this._authRepository, this._logoutUseCase)
+      : super(AuthInitial());
 
   Future<void> login(String email, String password) async {
     emit(AuthLoading());
@@ -44,5 +47,9 @@ class AuthCubit extends Cubit<AuthState> {
     } else {
       emit(AuthInitial());
     }
+  }
+
+  Future<void> logOut() async {
+    await _logoutUseCase.repository.logout();
   }
 }

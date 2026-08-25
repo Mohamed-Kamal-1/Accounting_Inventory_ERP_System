@@ -10,11 +10,11 @@ class ServerException implements Exception {
 }
 
 /// Exception for authentication errors at the data layer.
-class AuthException implements Exception {
+class AppAuthException implements Exception {
   final String message;
   final String? code;
 
-  const AuthException({required this.message, this.code});
+  const AppAuthException({required this.message, this.code});
 
   @override
   String toString() => 'AuthException: $message (code: $code)';

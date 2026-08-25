@@ -1,6 +1,6 @@
 // lib/features/inventory/domain/repositories/inventory_repository.dart
 
-import '../../../../core/error/api_result.dart';
+import '../../../../core/error/result.dart';
 import '../entities/category_entity.dart';
 import '../entities/inventory_transaction_entity.dart'; // استيراد الملف الصحيح للـ Entity
 import '../entities/product_entity.dart';

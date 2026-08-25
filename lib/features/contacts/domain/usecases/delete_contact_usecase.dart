@@ -1,6 +1,6 @@
 import 'package:injectable/injectable.dart';
 
-import '../../../../core/error/api_result.dart';
+import '../../../../core/error/result.dart';
 import '../repositories/contacts_repository.dart';
 
 @injectable

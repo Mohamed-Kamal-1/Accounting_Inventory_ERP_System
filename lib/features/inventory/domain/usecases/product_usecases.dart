@@ -1,6 +1,6 @@
 import 'package:injectable/injectable.dart';
 
-import '../../../../core/error/api_result.dart';
+import '../../../../core/error/result.dart';
 import '../entities/product_entity.dart';
 import '../repositories/inventory_repository.dart';
 

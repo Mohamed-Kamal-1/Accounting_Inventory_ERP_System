@@ -18,6 +18,7 @@ class AppRoute {
   static const String statement = '/statement';
   static const String reports = '/reports';
   static const String settings = '/settings';
+  static const String salesHistory = '/Sales_History';
 
   // مسارات المناديب
   static const String salesmanInventory = '/salesman_inventory';

@@ -1,8 +1,8 @@
 import 'package:injectable/injectable.dart';
 
-import '../../../../core/error/api_result.dart';
 import '../../../../core/error/exceptions.dart';
-import '../../../../core/errors/failure.dart';
+import '../../../../core/error/failure.dart';
+import '../../../../core/error/result.dart';
 import '../../domain/entities/sale_invoice_entity.dart';
 import '../../domain/repositories/sales_repository.dart';
 import '../datasources/sales_remote_datasource.dart';

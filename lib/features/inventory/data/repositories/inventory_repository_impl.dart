@@ -1,6 +1,6 @@
 import 'package:injectable/injectable.dart';
 
-import '../../../../core/error/api_result.dart';
+import '../../../../core/error/result.dart';
 import '../../../../core/network/execute_supabase.dart'; // استدعاء الجسر هنا
 import '../../domain/entities/category_entity.dart';
 import '../../domain/entities/inventory_transaction_entity.dart';

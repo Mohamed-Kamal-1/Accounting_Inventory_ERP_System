@@ -1,7 +1,5 @@
-import '../errors/failure.dart';
+import 'failure.dart';
 
-/// A simple Result type to replace dartz Either<Failure, T>.
-/// Represents either a success with data or a failure.
 sealed class Result<T> {
   const Result();
 
@@ -16,14 +14,6 @@ sealed class Result<T> {
 
   /// Returns true if this is a failure result.
   bool get isFailure => this is Fail<T>;
-
-  /// Maps the success value to a new type.
-  Result<R> map<R>(R Function(T data) transform) {
-    return switch (this) {
-      Success<T>(data: final data) => Result.success(transform(data)),
-      Fail<T>(failure: final failure) => Result.failure(failure),
-    };
-  }
 
   /// Fold: handle both success and failure cases.
   R fold<R>({

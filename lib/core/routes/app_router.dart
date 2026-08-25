@@ -11,20 +11,20 @@ import '../../features/contacts/presentation/view/contacts_screen.dart';
 import '../../features/inventory/presentation/view/inventory_screen.dart';
 import '../../features/reports_and_dashboard/view/dashboard_screen.dart';
 import '../../features/sales/presentation/view/sales_screen.dart';
+import '../../features/sales_history/presentation/view/sales_history_screen.dart';
 import '../../layout/main_layout.dart';
 import '../../splash_screen.dart';
 import 'app_routes.dart';
 
 class GoRouterRefreshStream extends ChangeNotifier {
+  late final StreamSubscription<dynamic> _subscription;
   GoRouterRefreshStream(Stream<dynamic> stream) {
     notifyListeners();
 
-    _subscription = stream.asBroadcastStream().listen(
-          (dynamic _) => notifyListeners(),
-        );
+    _subscription = stream.listen(
+      (dynamic _) => notifyListeners(),
+    );
   }
-
-  late final StreamSubscription<dynamic> _subscription;
 
   @override
   void dispose() {
@@ -35,8 +35,10 @@ class GoRouterRefreshStream extends ChangeNotifier {
 }
 
 class AppRouter {
+  static const String errorPath = "المسار غير موجود:";
+  static const String mainPath = "العودة للرئيسية";
+
   static GoRouter createRouter() {
-    // 1. استدعاء Cubit مباشرة من GetIt بدلاً من تمريره
     final authCubit = getIt.get<AuthCubit>();
 
     return GoRouter(
@@ -65,11 +67,10 @@ class AppRouter {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text('المسار غير موجود: ${state.uri.toString()}'),
+              Text('$errorPath ${state.uri.toString()}'),
               ElevatedButton(
-                // تصحيح كارثة context.pop() السابقة
                 onPressed: () => context.go(AppRoute.dashboard),
-                child: const Text('العودة للرئيسية'),
+                child: const Text(mainPath),
               )
             ],
           ),
@@ -84,15 +85,15 @@ class AppRouter {
           path: AppRoute.login,
           builder: (context, state) => const LoginScreen(),
         ),
-
-        // 2. تطبيق StatefulShellRoute لمنع فقدان البيانات
+        GoRoute(
+          path: AppRoute.salesHistory,
+          builder: (context, state) => const SalesHistoryScreen(),
+        ),
         StatefulShellRoute.indexedStack(
           builder: (context, state, navigationShell) {
-            // تمرير navigationShell للـ Layout بدلاً من child
             return MainLayout(navigationShell: navigationShell);
           },
           branches: [
-            // الفرع الأول: لوحة التحكم
             StatefulShellBranch(
               routes: [
                 GoRoute(
@@ -103,7 +104,6 @@ class AppRouter {
                 ),
               ],
             ),
-            // الفرع الثاني: المبيعات
             StatefulShellBranch(
               routes: [
                 GoRoute(
@@ -114,7 +114,6 @@ class AppRouter {
                 ),
               ],
             ),
-            // الفرع الثالث: جهات الاتصال
             StatefulShellBranch(
               routes: [
                 GoRoute(
@@ -125,7 +124,6 @@ class AppRouter {
                 ),
               ],
             ),
-            // الفرع الرابع: المخازن
             StatefulShellBranch(
               routes: [
                 GoRoute(

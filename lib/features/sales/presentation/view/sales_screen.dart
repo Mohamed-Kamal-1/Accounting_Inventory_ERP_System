@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:printing/printing.dart'; // مكتبة الطباعة
+import 'package:printing/printing.dart';
 
 import '../../../../core/di/di.dart';
+import '../../../sales_history/presentation/view/sales_history_screen.dart';
 import '../../domain/entities/sales_invoice_item_entity.dart';
 import '../view_model/cubit/sales_cubit.dart';
 import '../view_model/cubit/sales_invoice_state.dart';
@@ -33,6 +34,7 @@ class _SalesScreenState extends State<SalesScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isMobile = MediaQuery.sizeOf(context).width < 800;
     return BlocProvider<SalesCubit>(
       create: (context) => getIt.get<SalesCubit>()..initData(),
       child: Builder(
@@ -43,7 +45,6 @@ class _SalesScreenState extends State<SalesScreen> {
                 previous.submitError != current.submitError,
             listener: (context, state) async {
               if (state.isSuccess) {
-                // 1. التقاط البيانات قبل تفريغ الشاشة
                 final contactName = contactController.text;
                 final mode = state.currentMode;
                 final cart = List<SaleInvoiceItemEntity>.from(state.cart);
@@ -53,15 +54,13 @@ class _SalesScreenState extends State<SalesScreen> {
                 final paidAmount = state.paidAmount;
                 final remainingAmount = state.remainingAmount;
 
-                // 2. تفريغ الحقول والكيوبيت فوراً لمنع التكرار والحماية
                 contactController.clear();
                 cityController.clear();
                 context.read<SalesCubit>().resetCart();
 
-                // 3. عرض نافذة منبثقة للطباعة (Dialog) بدلاً من الفتح التلقائي
                 showDialog(
                   context: context,
-                  barrierDismissible: false, // يمنع إغلاق النافذة بالنقر خارجها
+                  barrierDismissible: false,
                   builder: (dialogContext) {
                     return AlertDialog(
                       shape: RoundedRectangleBorder(
@@ -81,8 +80,7 @@ class _SalesScreenState extends State<SalesScreen> {
                       actions: [
                         TextButton(
                           onPressed: () {
-                            Navigator.pop(
-                                dialogContext); // إغلاق النافذة وبدء فاتورة جديدة
+                            Navigator.pop(dialogContext);
                           },
                           child: const Text('فاتورة جديدة (تخطي)',
                               style: TextStyle(
@@ -91,8 +89,7 @@ class _SalesScreenState extends State<SalesScreen> {
                         ),
                         ElevatedButton.icon(
                           onPressed: () async {
-                            Navigator.pop(
-                                dialogContext); // إغلاق النافذة ثم فتح الطباعة
+                            Navigator.pop(dialogContext);
                             await Printing.layoutPdf(
                               name:
                                   'invoice_${DateTime.now().millisecondsSinceEpoch}.pdf',
@@ -134,73 +131,117 @@ class _SalesScreenState extends State<SalesScreen> {
               }
             },
             child: Scaffold(
-              backgroundColor: const Color(0xFFF5F7FA), // لون عصري ومريح للعين
+              backgroundColor: const Color(0xFFF5F7FA),
               body: SingleChildScrollView(
                 padding: const EdgeInsets.all(24.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
+                    // 💡 التعديل هنا: استخدام Wrap بدلاً من Row لحل مشكلة المساحة
+                    Wrap(
+                      alignment: WrapAlignment.spaceBetween,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      spacing: 12,
+                      runSpacing: 12,
                       children: [
-                        const Icon(Icons.point_of_sale_rounded,
-                            color: Colors.blueAccent, size: 32),
-                        const SizedBox(width: 12),
-                        const Text(
-                          'إنشاء عملية بيع',
-                          style: TextStyle(
-                              fontSize: 26,
-                              fontWeight: FontWeight.w900,
-                              color: Color(0xFF1E293B)),
+                        Visibility(
+                          visible: (!isMobile),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.point_of_sale_rounded,
+                                  color: Colors.blueAccent, size: 32),
+                              const SizedBox(width: 12),
+                              const Text(
+                                'إنشاء عملية بيع',
+                                style: TextStyle(
+                                    fontSize: 26,
+                                    fontWeight: FontWeight.w900,
+                                    color: Color(0xFF1E293B)),
+                              ),
+                            ],
+                          ),
                         ),
-                        const Spacer(),
-                        ElevatedButton.icon(
-                          onPressed: () async {
-                            final lastInvoice =
-                                context.read<SalesCubit>().lastSavedInvoiceData;
-
-                            if (lastInvoice == null) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text(
-                                      'لا توجد فاتورة سابقة لطباعتها. قم بحفظ عملية بيع أولاً.'),
-                                  backgroundColor: Colors.orange,
-                                ),
-                              );
-                              return;
-                            }
-
-                            await Printing.layoutPdf(
-                              name:
-                                  'invoice_reprint_${DateTime.now().millisecondsSinceEpoch}.pdf',
-                              onLayout: (format) async {
-                                return await PdfInvoiceGenerator
-                                    .generateInvoice(
-                                  contactName: lastInvoice['contactName'],
-                                  currentMode: lastInvoice['currentMode'],
-                                  cart: lastInvoice['cart'],
-                                  subTotal: lastInvoice['subTotal'],
-                                  discount: lastInvoice['discount'],
-                                  grandTotal: lastInvoice['grandTotal'],
-                                  paidAmount: lastInvoice['paidAmount'],
-                                  remainingAmount:
-                                      lastInvoice['remainingAmount'],
+                        Wrap(
+                          spacing: 12,
+                          runSpacing: 12,
+                          children: [
+                            ElevatedButton.icon(
+                              onPressed: () {
+                                Navigator.of(context, rootNavigator: true).push(
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        const SalesHistoryScreen(),
+                                  ),
                                 );
                               },
-                            );
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.white,
-                            foregroundColor: Colors.blueGrey,
-                            elevation: 1,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              side: const BorderSide(
-                                  color: Colors.blueGrey, width: 0.5),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.white,
+                                foregroundColor: const Color(0xFF1E293B),
+                                elevation: 1,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                  side: BorderSide(
+                                      color: Colors.grey.shade300, width: 1),
+                                ),
+                              ),
+                              icon: const Icon(Icons.history_rounded, size: 20),
+                              label: const Text('سجل الفواتير',
+                                  style:
+                                      TextStyle(fontWeight: FontWeight.bold)),
                             ),
-                          ),
-                          icon: const Icon(Icons.print_rounded, size: 20),
-                          label: const Text('طباعة آخر فاتورة',
-                              style: TextStyle(fontWeight: FontWeight.bold)),
+                            ElevatedButton.icon(
+                              onPressed: () async {
+                                final lastInvoice = context
+                                    .read<SalesCubit>()
+                                    .lastSavedInvoiceData;
+
+                                if (lastInvoice == null) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text(
+                                          'لا توجد فاتورة سابقة لطباعتها. قم بحفظ عملية بيع أولاً.'),
+                                      backgroundColor: Colors.orange,
+                                    ),
+                                  );
+                                  return;
+                                }
+
+                                await Printing.layoutPdf(
+                                  name:
+                                      'invoice_reprint_${DateTime.now().millisecondsSinceEpoch}.pdf',
+                                  onLayout: (format) async {
+                                    return await PdfInvoiceGenerator
+                                        .generateInvoice(
+                                      contactName: lastInvoice['contactName'],
+                                      currentMode: lastInvoice['currentMode'],
+                                      cart: lastInvoice['cart'],
+                                      subTotal: lastInvoice['subTotal'],
+                                      discount: lastInvoice['discount'],
+                                      grandTotal: lastInvoice['grandTotal'],
+                                      paidAmount: lastInvoice['paidAmount'],
+                                      remainingAmount:
+                                          lastInvoice['remainingAmount'],
+                                    );
+                                  },
+                                );
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.white,
+                                foregroundColor: Colors.blueGrey,
+                                elevation: 1,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                  side: const BorderSide(
+                                      color: Colors.blueGrey, width: 0.5),
+                                ),
+                              ),
+                              icon: const Icon(Icons.print_rounded, size: 20),
+                              label: const Text('طباعة آخر فاتورة',
+                                  style:
+                                      TextStyle(fontWeight: FontWeight.bold)),
+                            ),
+                          ],
                         ),
                       ],
                     ),

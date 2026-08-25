@@ -1,8 +1,8 @@
 import 'package:injectable/injectable.dart';
 
-import '../../../../core/error/api_result.dart'; // مسارك الجديد
 import '../../../../core/error/exceptions.dart';
-import '../../../../core/errors/failure.dart'; // تأكد من مسار الـ Failure
+import '../../../../core/error/failure.dart'; // تأكد من مسار الـ Failure
+import '../../../../core/error/result.dart'; // مسارك الجديدlure
 import '../../domain/entities/contact_entity.dart';
 import '../../domain/repositories/contacts_repository.dart';
 import '../datasources/contacts_remote_data_source.dart';

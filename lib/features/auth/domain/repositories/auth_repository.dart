@@ -1,4 +1,4 @@
-import '../../../../core/error/api_result.dart';
+import '../../../../core/error/result.dart';
 import '../entities/user_entity.dart';
 
 abstract class AuthRepository {

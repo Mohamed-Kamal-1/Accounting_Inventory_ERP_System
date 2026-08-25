@@ -53,27 +53,37 @@ class InvoiceTotalsWidget extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               if (!isSalesman)
-                Row(
+                // 💡 التعديل هنا: Wrap للخصم والإجمالي
+                Wrap(
+                  alignment: WrapAlignment.spaceBetween,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  spacing: 16,
+                  runSpacing: 16,
                   children: [
-                    const Text('خصم % :',
-                        style: TextStyle(
-                            fontWeight: FontWeight.w600,
-                            color: Colors.black87)),
-                    const SizedBox(width: 12),
-                    SizedBox(
-                      width: 100,
-                      child: TextField(
-                        keyboardType: const TextInputType.numberWithOptions(
-                            decimal: true),
-                        decoration: _smallInputDecoration(),
-                        onChanged: (value) {
-                          // إرسال قيمة الخصم للـ Cubit
-                          final discount = double.tryParse(value) ?? 0.0;
-                          context.read<SalesCubit>().updateDiscount(discount);
-                        },
-                      ),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Text('خصم % :',
+                            style: TextStyle(
+                                fontWeight: FontWeight.w600,
+                                color: Colors.black87)),
+                        const SizedBox(width: 12),
+                        SizedBox(
+                          width: 90, // تم تقليل العرض قليلاً ليتناسب أكثر
+                          child: TextField(
+                            keyboardType: const TextInputType.numberWithOptions(
+                                decimal: true),
+                            decoration: _smallInputDecoration(),
+                            onChanged: (value) {
+                              final discount = double.tryParse(value) ?? 0.0;
+                              context
+                                  .read<SalesCubit>()
+                                  .updateDiscount(discount);
+                            },
+                          ),
+                        ),
+                      ],
                     ),
-                    const Spacer(),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
@@ -88,9 +98,16 @@ class InvoiceTotalsWidget extends StatelessWidget {
                     )
                   ],
                 ),
+
               if (!isSalesman)
                 const Divider(height: 30, color: Color(0xFFF1F5F9)),
-              Row(
+
+              // 💡 التعديل هنا: Wrap للصافي النهائي والمدفوع
+              Wrap(
+                alignment: WrapAlignment.spaceBetween,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                spacing: 16,
+                runSpacing: 16,
                 children: [
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -104,40 +121,54 @@ class InvoiceTotalsWidget extends StatelessWidget {
                               fontSize: 24)),
                     ],
                   ),
-                  const Spacer(),
-                  if (!isSalesman) ...[
-                    const Text('المدفوع :',
-                        style: TextStyle(
-                            fontWeight: FontWeight.w600,
-                            color: Colors.black87)),
-                    const SizedBox(width: 12),
-                    SizedBox(
-                      width: 120,
-                      child: TextField(
-                        keyboardType: const TextInputType.numberWithOptions(
-                            decimal: true),
-                        decoration: _smallInputDecoration(),
-                        onChanged: (value) {
-                          // إرسال المبلغ المدفوع للـ Cubit (والذي يتكفل بالتحقق المالي)
-                          final paid = double.tryParse(value) ?? 0.0;
-                          context.read<SalesCubit>().updatePaidAmount(paid);
-                        },
-                      ),
-                    ),
-                    const SizedBox(width: 24),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
+                  if (!isSalesman)
+                    Wrap(
+                      spacing: 16,
+                      runSpacing: 16,
+                      crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
-                        const Text('المتبقي (آجل)',
-                            style: TextStyle(fontSize: 12, color: Colors.grey)),
-                        Text('${state.remainingAmount.toStringAsFixed(2)} ج.م',
-                            style: const TextStyle(
-                                color: Color(0xFFEF4444),
-                                fontWeight: FontWeight.bold,
-                                fontSize: 18)),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Text('المدفوع :',
+                                style: TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.black87)),
+                            const SizedBox(width: 12),
+                            SizedBox(
+                              width: 100, // تم تقليل العرض قليلاً
+                              child: TextField(
+                                keyboardType:
+                                    const TextInputType.numberWithOptions(
+                                        decimal: true),
+                                decoration: _smallInputDecoration(),
+                                onChanged: (value) {
+                                  final paid = double.tryParse(value) ?? 0.0;
+                                  context
+                                      .read<SalesCubit>()
+                                      .updatePaidAmount(paid);
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            const Text('المتبقي (آجل)',
+                                style: TextStyle(
+                                    fontSize: 12, color: Colors.grey)),
+                            Text(
+                                '${state.remainingAmount.toStringAsFixed(2)} ج.م',
+                                style: const TextStyle(
+                                    color: Color(0xFFEF4444),
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 18)),
+                          ],
+                        ),
                       ],
-                    ),
-                  ] else ...[
+                    )
+                  else
                     Container(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 16, vertical: 8),
@@ -145,19 +176,23 @@ class InvoiceTotalsWidget extends StatelessWidget {
                         color: Colors.blue.shade50,
                         borderRadius: BorderRadius.circular(8),
                       ),
+                      // 💡 إصلاح طفح النص في حالة المندوب
                       child: const Row(
+                        mainAxisSize: MainAxisSize.min,
                         children: [
                           Icon(Icons.info_outline,
                               color: Colors.blue, size: 20),
                           SizedBox(width: 8),
-                          Text('معاملة نقل عهدة (لا توجد حسابات مالية)',
-                              style: TextStyle(
-                                  color: Colors.blue,
-                                  fontWeight: FontWeight.bold)),
+                          Flexible(
+                            child: Text(
+                                'معاملة نقل عهدة (لا توجد حسابات مالية)',
+                                style: TextStyle(
+                                    color: Colors.blue,
+                                    fontWeight: FontWeight.bold)),
+                          ),
                         ],
                       ),
                     ),
-                  ],
                 ],
               ),
               const SizedBox(height: 32),
@@ -165,11 +200,9 @@ class InvoiceTotalsWidget extends StatelessWidget {
                 width: double.infinity,
                 height: 56,
                 child: ElevatedButton.icon(
-                  // تعطيل الضغط في حالة التحميل أو جاري الإرسال لمنع التكرار
                   onPressed: state.isSubmitting
                       ? null
                       : () {
-                          // استدعاء دالة تقديم الفاتورة بالبيانات المجمعة
                           context.read<SalesCubit>().submitInvoice(
                                 contactId: state.selectedContactId,
                                 contactName: contactController.text,

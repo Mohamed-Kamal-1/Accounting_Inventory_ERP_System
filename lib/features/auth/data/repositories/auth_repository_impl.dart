@@ -1,9 +1,9 @@
 import 'package:injectable/injectable.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../../../../core/error/api_result.dart';
 import '../../../../core/error/exceptions.dart';
-import '../../../../core/errors/failure.dart';
+import '../../../../core/error/failure.dart';
+import '../../../../core/error/result.dart';
 import '../../../../core/network/execute_supabase.dart';
 import '../../domain/entities/user_entity.dart';
 import '../../domain/repositories/auth_repository.dart';
@@ -38,7 +38,6 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<Result<UserEntity>> getUserData(String uid) async {
     return executeSupabase(() async {
-      // ⚠️ التعديل هنا: استخدام جدول profiles بدلاً من users
       final response =
           await client.from('profiles').select().eq('id', uid).single();
 

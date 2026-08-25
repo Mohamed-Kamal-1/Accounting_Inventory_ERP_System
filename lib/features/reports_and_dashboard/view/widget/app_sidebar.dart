@@ -37,11 +37,14 @@ class AppSidebar extends StatelessWidget {
               navigationShell: navigationShell,
             ),
             const Divider(),
-            const ListTile(
-              leading: Icon(Icons.logout, color: Colors.red),
-              title: Text(
-                'تسجيل الخروج',
-                style: TextStyle(color: Colors.red),
+            ListTile(
+              leading: const Icon(Icons.logout, color: Colors.red),
+              title: GestureDetector(
+                child: const Text(
+                  'تسجيل الخروج',
+                  style: TextStyle(color: Colors.red),
+                ),
+                onTap: () {},
               ),
             ),
             const SizedBox(height: 20),

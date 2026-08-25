@@ -10,11 +10,9 @@ import 'features/auth/presentation/cubit/auth_cubit.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  // تنبيه أمني: وضع المفاتيح هنا مباشرة هو ممارسة خاطئة في بيئة الإنتاج، يجب استخدام .env لاحقاً
   await Supabase.initialize(
     url: 'https://qskkxcuylefaxlqgpsnh.supabase.co',
-    publishableKey: 'sb_publishable_MJB1LPjSks55efzlOumz9g__6X_yuRx',
+    publishableKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFza2t4Y3V5bGVmYXhscWdwc25oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3NDI1NDEsImV4cCI6MjA5OTMxODU0MX0.SumZzcYLvTMQ2VlfDbjiIUoAZzDtfG8EEt5Ca9AGqtE',
   );
 
   configureDependencies();
@@ -30,23 +28,21 @@ class AccountingApp extends StatefulWidget {
 }
 
 class _AccountingAppState extends State<AccountingApp> {
-  // 1. تعريف الراوتر كمتغير نهائي متأخر
+  static const String title = "Life Plast";
   late final GoRouter _appRouter;
 
   @override
   void initState() {
     super.initState();
-    // 2. إنشاء الراوتر مرة واحدة فقط في دورة حياة التطبيق
     _appRouter = AppRouter.createRouter();
   }
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      // 3. التهيئة الصحيحة للـ Bloc باستخدام create
       create: (context) => getIt.get<AuthCubit>()..checkAuthStatus(),
       child: MaterialApp.router(
-        title: 'Life Plast',
+        title: title,
         debugShowCheckedModeBanner: false,
         theme: AppTheme.lightTheme,
         routerConfig: _appRouter,

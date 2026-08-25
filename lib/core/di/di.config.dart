@@ -97,6 +97,14 @@ import '../../features/sales/domain/repositories/sales_repository.dart'
     as _i434;
 import '../../features/sales/presentation/view_model/cubit/sales_cubit.dart'
     as _i228;
+import '../../features/sales_history/data/datasources/sales_history_remote_data_source.dart'
+    as _i303;
+import '../../features/sales_history/data/repositories/sales_history_repository_impl.dart'
+    as _i874;
+import '../../features/sales_history/domain/repositories/sales_history_repository.dart'
+    as _i230;
+import '../../features/sales_history/presentation/view_model/cubit/sales_history_cubit.dart'
+    as _i478;
 import 'module/register_module.dart' as _i209;
 
 extension GetItInjectableX on _i174.GetIt {
@@ -126,6 +134,9 @@ extension GetItInjectableX on _i174.GetIt {
         () => _i1019.SalesRemoteDataSourceImpl(gh<_i454.SupabaseClient>()));
     gh.singleton<_i940.AccountsRemoteDataSource>(
         () => _i940.AccountsRemoteDataSourceImpl());
+    gh.lazySingleton<_i303.SalesHistoryRemoteDataSource>(() =>
+        _i303.SalesHistoryRemoteDataSource(
+            supabaseClient: gh<_i454.SupabaseClient>()));
     gh.singleton<_i991.ReportsRemoteDataSource>(
         () => _i991.ReportsRemoteDataSourceImpl());
     gh.factory<_i586.AuthRemoteDataSourceImpl>(
@@ -148,6 +159,11 @@ extension GetItInjectableX on _i174.GetIt {
         () => _i188.LoginUseCase(gh<_i787.AuthRepository>()));
     gh.factory<_i48.LogoutUseCase>(
         () => _i48.LogoutUseCase(gh<_i787.AuthRepository>()));
+    gh.lazySingleton<_i117.AuthCubit>(() => _i117.AuthCubit(
+          gh<_i188.LoginUseCase>(),
+          gh<_i787.AuthRepository>(),
+          gh<_i48.LogoutUseCase>(),
+        ));
     gh.factory<_i909.ContactsRepository>(() =>
         _i663.ContactsRepositoryImpl(gh<_i936.ContactsRemoteDataSourceImpl>()));
     gh.factory<_i434.SalesRepository>(
@@ -158,12 +174,11 @@ extension GetItInjectableX on _i174.GetIt {
         () => _i672.InvoicesCubit(gh<_i920.CreateInvoiceUseCase>()));
     gh.factory<_i1015.GetDashboardStatsUseCase>(
         () => _i1015.GetDashboardStatsUseCase(gh<_i959.ReportsRepository>()));
+    gh.lazySingleton<_i230.SalesHistoryRepository>(() =>
+        _i874.SalesHistoryRepositoryImpl(
+            remoteDataSource: gh<_i303.SalesHistoryRemoteDataSource>()));
     gh.factory<_i422.InventoryRepository>(() =>
         _i572.InventoryRepositoryImpl(gh<_i103.InventoryRemoteDataSource>()));
-    gh.lazySingleton<_i117.AuthCubit>(() => _i117.AuthCubit(
-          gh<_i188.LoginUseCase>(),
-          gh<_i787.AuthRepository>(),
-        ));
     gh.factory<_i115.CustodyCubit>(
         () => _i115.CustodyCubit(gh<_i422.InventoryRepository>()));
     gh.factory<_i431.GetCategoriesUseCase>(
@@ -198,6 +213,8 @@ extension GetItInjectableX on _i174.GetIt {
           gh<_i422.InventoryRepository>(),
           gh<_i909.ContactsRepository>(),
         ));
+    gh.factory<_i478.SalesHistoryCubit>(() => _i478.SalesHistoryCubit(
+        repository: gh<_i230.SalesHistoryRepository>()));
     gh.factory<_i793.ReportsCubit>(
         () => _i793.ReportsCubit(gh<_i1015.GetDashboardStatsUseCase>()));
     gh.factory<_i295.ContactsBloc>(() => _i295.ContactsBloc(

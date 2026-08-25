@@ -8,14 +8,13 @@ class DashboardScreen extends StatelessWidget {
     final screenWidth = MediaQuery.sizeOf(context).width;
 
     return Scaffold(
-      backgroundColor: Colors.transparent, // تعتمد على لون الهيكل الرئيسي
+      backgroundColor: Colors.transparent,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // الهيدر وزر الإيداع
               SizedBox(
                 width: double.infinity,
                 child: Wrap(
@@ -43,8 +42,6 @@ class DashboardScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 15),
-
-              // كارت الفلاتر (التواريخ)
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(12),
@@ -77,8 +74,6 @@ class DashboardScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 15),
-
-              // العدادات والبطاقات الخمسة
               SizedBox(
                 width: double.infinity,
                 child: Wrap(
@@ -108,8 +103,6 @@ class DashboardScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 20),
-
-              // جدول تفاصيل الحركة
               Expanded(
                 child: Container(
                   width: double.infinity,

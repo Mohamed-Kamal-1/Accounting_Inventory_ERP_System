@@ -1,6 +1,8 @@
 import '../../domain/entities/user_entity.dart';
 
 class UserModel extends UserEntity {
+  static const String noName = 'بدون اسم';
+  static const String sales = 'sales';
   const UserModel({
     required super.id,
     required super.email,
@@ -13,8 +15,8 @@ class UserModel extends UserEntity {
     return UserModel(
       id: id,
       email: email,
-      fullName: json['full_name'] ?? 'بدون اسم',
-      role: json['role'] ?? 'sales',
+      fullName: json['full_name'] ?? noName,
+      role: json['role'] ?? sales,
     );
   }
 }
