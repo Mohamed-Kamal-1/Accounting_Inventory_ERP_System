@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../ widgets/inventory_stats_cards.dart';
-import '../ widgets/product_form_dialog.dart';
 import '../../../../core/di/di.dart';
 import '../../../auth/presentation/cubit/auth_cubit.dart';
 import '../../../auth/presentation/cubit/auth_state.dart';
@@ -11,6 +9,8 @@ import '../bloc/inventory_event.dart';
 import '../bloc/inventory_state.dart';
 import '../widgets/category_management_dialog.dart';
 import '../widgets/inventory_action_bar.dart';
+import '../widgets/inventory_stats_cards.dart';
+import '../widgets/product_form_dialog.dart';
 import '../widgets/products_table.dart';
 
 class InventoryScreen extends StatelessWidget {
@@ -18,6 +18,8 @@ class InventoryScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isMobile = MediaQuery.sizeOf(context).width < 800;
+
     return BlocProvider(
       create: (context) =>
           getIt.get<InventoryBloc>()..add(LoadInventoryEvent()),
@@ -44,60 +46,55 @@ class InventoryScreen extends StatelessWidget {
               return const Center(child: CircularProgressIndicator());
             } else if (state is InventoryLoaded) {
               return Padding(
-                padding: const EdgeInsets.all(20.0),
+                padding: EdgeInsets.all(isMobile ? 12.0 : 20.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    Wrap(
+                      alignment: WrapAlignment.spaceBetween,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      spacing: 12,
+                      runSpacing: 12,
                       children: [
-                        const Text(
-                          '📦 إدارة المخزن والمستودعات',
-                          style: TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFF2C3E50)),
-                        ),
-                        Row(
+                        if (!isMobile)
+                          const Text(
+                            '📦 إدارة المخزن والمستودعات',
+                            style: TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF2C3E50)),
+                          ),
+                        Wrap(
+                          spacing: 10,
+                          runSpacing: 10,
                           children: [
-                            // 1. زر إدارة الأقسام (يظهر للمدير فقط)
                             Builder(builder: (context) {
-                              // قراءة حالة المستخدم الحالي من AuthCubit
                               final authState = context.read<AuthCubit>().state;
                               bool isAdmin = false;
 
                               if (authState is AuthSuccess) {
-                                isAdmin = authState.user.role ==
-                                    'admin'; // تأكد أن الكلمة تطابق ما في قاعدة البيانات
+                                isAdmin = authState.user.role == 'admin';
                               }
 
-                              // إذا لم يكن مديراً، نُرجع مساحة فارغة (SizedBox.shrink)
                               if (!isAdmin) return const SizedBox.shrink();
 
-                              // إذا كان مديراً، نظهر الزر
-                              return Padding(
-                                padding: const EdgeInsets.only(left: 15.0),
-                                child: OutlinedButton.icon(
-                                  icon: const Icon(Icons.category),
-                                  label: const Text('إدارة الأقسام'),
-                                  onPressed: () {
-                                    showDialog(
-                                      context: context,
-                                      builder: (ctx) =>
-                                          CategoryManagementDialog(
-                                              bloc: context
-                                                  .read<InventoryBloc>()),
-                                    );
-                                  },
-                                ),
+                              return OutlinedButton.icon(
+                                icon: const Icon(Icons.category, size: 18),
+                                label: const Text('إدارة الأقسام'),
+                                onPressed: () {
+                                  showDialog(
+                                    context: context,
+                                    builder: (ctx) => CategoryManagementDialog(
+                                        bloc: context.read<InventoryBloc>()),
+                                  );
+                                },
                               );
                             }),
-
-                            // 2. زر إضافة صنف جديد (متاح حسب رغبتك، للكل أو للمدير فقط بنفس الطريقة)
                             ElevatedButton.icon(
                               style: ElevatedButton.styleFrom(
                                   backgroundColor: const Color(0xFF2ECC71)),
-                              icon: const Icon(Icons.add, color: Colors.white),
+                              icon: const Icon(Icons.add,
+                                  color: Colors.white, size: 18),
                               label: const Text('إضافة صنف جديد',
                                   style: TextStyle(color: Colors.white)),
                               onPressed: () {
@@ -125,11 +122,11 @@ class InventoryScreen extends StatelessWidget {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 16),
                     InventoryStatsCards(products: state.allProducts),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 16),
                     InventoryActionBar(state: state),
-                    const SizedBox(height: 15),
+                    const SizedBox(height: 12),
                     Expanded(child: ProductsTable(state: state)),
                   ],
                 ),
