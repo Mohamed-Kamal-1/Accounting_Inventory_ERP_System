@@ -48,4 +48,11 @@ final List<SidebarItem> appMenuItems = [
     roles: ['admin', 'manager'],
     branchIndex: 3, // الفرع الرابع
   ),
+  SidebarItem(
+    title: 'المشتريات',
+    route: AppRoute.purchases,
+    icon: Icons.shopify_outlined,
+    roles: ['admin', 'manager'],
+    branchIndex: 4, // الفرع الرابع
+  ),
 ];

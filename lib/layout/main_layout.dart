@@ -1,7 +1,6 @@
+import 'package:accounting_desktop/layout/side_bar/app_sidebar.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-
-import '../features/reports_and_dashboard/view/widget/app_sidebar.dart';
 
 class MainLayout extends StatelessWidget {
   final StatefulNavigationShell navigationShell;

@@ -40,4 +40,36 @@ class AuthRemoteDataSourceImpl {
       throw ServerException(message: 'حدث خطأ غير متوقع: ${e.toString()}');
     }
   }
+
+  Future<UserModel> register(
+      String fullName, String email, String password) async {
+    try {
+      final response = await supabaseClient.auth.signUp(
+        email: email,
+        password: password,
+      );
+
+      if (response.user == null) {
+        throw const AppAuthException(message: 'فشل إنشاء الحساب');
+      }
+
+      await supabaseClient.from('profiles').upsert({
+        'id': response.user!.id,
+        'full_name': fullName,
+        'email': email,
+        'role': 'admin',
+      });
+
+      return UserModel(
+        id: response.user!.id,
+        email: email,
+        fullName: fullName,
+        role: 'admin',
+      );
+    } on AppAuthException catch (e) {
+      throw ServerException(message: e.message);
+    } catch (e) {
+      throw ServerException(message: 'حدث خطأ أثناء التسجيل: ${e.toString()}');
+    }
+  }
 }

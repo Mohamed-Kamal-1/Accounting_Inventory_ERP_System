@@ -1,7 +1,8 @@
-class AppRoute {
+abstract class AppRoute {
   static const String splash = '/';
 
   static const String login = '/login';
+  static const String register = '/register';
   static const String dashboard = '/dashboard';
   static const String sales = '/sales';
   static const String purchases = '/purchases';
@@ -19,6 +20,7 @@ class AppRoute {
   static const String reports = '/reports';
   static const String settings = '/settings';
   static const String salesHistory = '/Sales_History';
+  static const String purchasesHistory = '/purchasesHistory_History';
 
   // مسارات المناديب
   static const String salesmanInventory = '/salesman_inventory';

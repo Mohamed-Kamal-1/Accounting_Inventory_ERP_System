@@ -49,4 +49,22 @@ class AuthRepositoryImpl implements AuthRepository {
       );
     });
   }
+
+  @override
+  Future<Result<UserEntity>> register({
+    required String fullName,
+    required String email,
+    required String password,
+  }) async {
+    try {
+      final userModel =
+          await remoteDataSource.register(fullName, email, password);
+      return Result.success(userModel);
+    } on ServerException catch (e) {
+      return Result.failure(ServerFailure(message: e.message));
+    } catch (e) {
+      return Result.failure(
+          ServerFailure(message: 'حدث خطأ غير متوقع أثناء إنشاء الحساب'));
+    }
+  }
 }

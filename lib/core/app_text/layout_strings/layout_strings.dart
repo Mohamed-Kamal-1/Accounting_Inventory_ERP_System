@@ -5,5 +5,5 @@ class LayoutStrings {
   static const String accounts = "الحسابات والجهات";
   static const String sales = "فواتير المبيعات";
   static const String purchases = "فواتير المشتريات";
-  static const String logout = "تسجيل الخروج";
+  // static const String logout = "تسجيل الخروج";
 }

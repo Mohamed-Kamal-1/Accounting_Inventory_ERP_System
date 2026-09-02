@@ -49,7 +49,30 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
+  Future<void> register(String fullName, String email, String password) async {
+    emit(AuthLoading());
+
+    // استدعاء المستودع مباشرة (أو استخدام RegisterUseCase إذا قمت بإنشائه)
+    final result = await _authRepository.register(
+      fullName: fullName,
+      email: email,
+      password: password,
+    );
+
+    result.fold(
+      onFailure: (failure) => emit(AuthError(failure.message)),
+      onSuccess: (user) => emit(AuthSuccess(user)),
+    );
+  }
+
   Future<void> logOut() async {
-    await _logoutUseCase.repository.logout();
+    emit(AuthLoading()); // إظهار حالة تحميل بسيطة أثناء الاتصال بالسيرفر
+    try {
+      // يمكنك استخدام _logoutUseCase() أو الـ repository مباشرة
+      await _authRepository.logout();
+      emit(AuthInitial()); // 💡 إجبار التطبيق على العودة لحالة "غير مسجل"
+    } catch (e) {
+      emit(AuthInitial()); // حتى لو حدث خطأ في الشبكة، اخرجه من التطبيق للأمان
+    }
   }
 }

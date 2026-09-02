@@ -7,8 +7,11 @@ import 'package:go_router/go_router.dart';
 import '../../features/auth/presentation/cubit/auth_cubit.dart';
 import '../../features/auth/presentation/cubit/auth_state.dart';
 import '../../features/auth/presentation/view/login_screen.dart';
+import '../../features/auth/presentation/view/register_screen.dart';
 import '../../features/contacts/presentation/view/contacts_screen.dart';
 import '../../features/inventory/presentation/view/inventory_screen.dart';
+import '../../features/purchases/presentation/view/add_purchase_screen.dart';
+import '../../features/purchases_history/presentation/view/purchases_history_screen.dart';
 import '../../features/reports_and_dashboard/view/dashboard_screen.dart';
 import '../../features/sales/presentation/view/sales_screen.dart';
 import '../../features/sales_history/presentation/view/sales_history_screen.dart';
@@ -48,19 +51,26 @@ class AppRouter {
         final authState = authCubit.state;
         final isGoingToLogin = state.matchedLocation == AppRoute.login;
         final isGoingToSplash = state.matchedLocation == AppRoute.splash;
+        // 💡 إضافة مسار التسجيل لكي نسمح للزوار بالوصول إليه
+        final isGoingToRegister = state.matchedLocation == AppRoute.register;
 
         if (authState is AuthLoading) return null;
 
+        // حالة الزائر (غير مسجل الدخول)
         if (authState is AuthInitial || authState is AuthError) {
-          if (!isGoingToLogin && !isGoingToSplash) {
-            return AppRoute.login;
+          // اسمح له بالبقاء فقط إذا كان في الدخول، أو السبلاش، أو التسجيل
+          if (!isGoingToLogin && !isGoingToSplash && !isGoingToRegister) {
+            return AppRoute.login; // اطرد أي محاولة اختراق لشاشات النظام
           }
-        } else if (authState is AuthSuccess) {
-          if (isGoingToLogin || isGoingToSplash) {
+        }
+        // حالة المستخدم الموثق (مسجل الدخول بنجاح)
+        else if (authState is AuthSuccess) {
+          // إذا حاول الرجوع للخلف لصفحات الدخول أو التسجيل، امنعه ووجهه للوحة القيادة
+          if (isGoingToLogin || isGoingToSplash || isGoingToRegister) {
             return AppRoute.dashboard;
           }
         }
-        return null;
+        return null; // في أي حالة أخرى طبيعية، اسمح بالمرور
       },
       errorBuilder: (context, state) => Scaffold(
         body: Center(
@@ -86,8 +96,16 @@ class AppRouter {
           builder: (context, state) => const LoginScreen(),
         ),
         GoRoute(
+          path: AppRoute.register,
+          builder: (context, state) => const RegisterScreen(),
+        ),
+        GoRoute(
           path: AppRoute.salesHistory,
           builder: (context, state) => const SalesHistoryScreen(),
+        ),
+        GoRoute(
+          path: AppRoute.purchasesHistory,
+          builder: (context, state) => const PurchasesHistoryScreen(),
         ),
         StatefulShellRoute.indexedStack(
           builder: (context, state, navigationShell) {
@@ -130,6 +148,16 @@ class AppRouter {
                   path: AppRoute.inventory,
                   pageBuilder: (context, state) => const NoTransitionPage(
                     child: InventoryScreen(),
+                  ),
+                ),
+              ],
+            ),
+            StatefulShellBranch(
+              routes: [
+                GoRoute(
+                  path: AppRoute.purchases,
+                  pageBuilder: (context, state) => const NoTransitionPage(
+                    child: AddPurchaseScreen(),
                   ),
                 ),
               ],

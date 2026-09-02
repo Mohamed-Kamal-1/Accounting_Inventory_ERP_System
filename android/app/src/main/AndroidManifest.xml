@@ -1,6 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.INTERNET"/>
     <application
-        android:label="life_plast_version_3"
+        android:label="Accounting Inventory System"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
