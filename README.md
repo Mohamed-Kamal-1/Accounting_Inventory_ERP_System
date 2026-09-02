@@ -19,7 +19,6 @@ Get the latest version of the application for your operating system:
 
 * 💻 **Windows:** [Download .exe (v1.0.0)](#) <!-- استبدل علامة # برابط التحميل -->
 * 📱 **Android:** [Download .apk (v1.0.0)](#) <!-- استبدل علامة # برابط التحميل -->
-* 🌐 **Web:** [Live Demo](#) <!-- استبدل علامة # برابط الموقع إن وجد -->
 
 ---
 
