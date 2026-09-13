@@ -1,52 +1,77 @@
-# 🛠️ Life Plast ERP System (Cloud-Enabled Desktop & Mobile)
+# 📊 Smart Accounting & ERP System
 
-**A High-Performance ERP solution tailored for industrial supply management, powered by Supabase.**
+<div align="center">
+  <img src="https://img.shields.io/badge/Flutter-02569B?style=for-the-badge&logo=flutter&logoColor=white" />
+  <img src="https://img.shields.io/badge/Dart-0175C2?style=for-the-badge&logo=dart&logoColor=white" />
+  <img src="https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white" />
+  <img src="https://img.shields.io/badge/BLoC-1976D2?style=for-the-badge&logo=flutter&logoColor=white" />
+</div>
 
-Built for **stability**, **data integrity**, and **speed**, leveraging a robust relational cloud backend to ensure seamless data synchronization across Windows Desktop and Mobile environments.
+<br>
+
+A modern, comprehensive, and fully responsive Accounting and ERP application built with **Flutter**. Designed to work seamlessly across **Desktop, Tablet, and Mobile** devices. It handles sales, purchases, inventory, cash flow, and PDF report generation with full Arabic language support.
 
 ---
 
-## 🚀 Overview
-Life Plast ERP is a specialized management system designed for industrial and plumbing supply companies. It replaces manual paperwork with a robust digital infrastructure, focusing on fast data entry, secure cloud storage, and real-time record-keeping.
+## 🚀 Download & Installation
 
-### Key Business Modules:
-* **Inventory Engine:** Real-time stock tracking with cloud-based data persistence.
-* **Invoicing System:** Instant digital invoice generation and secure record-keeping for daily sales.
-* **Stock Flow Audit:** Specialized logic to track and verify stock movements and sales history.
-* **Performance Dashboard:** High-speed data visualization for sales trends and stock alerts.
+Get the latest version of the application for your operating system:
+
+* 💻 **Windows:** https://bit.ly/3URiTKy
+* 📱 **Android:** https://bit.ly/3UNRY2g
+
+---
+
+## ✨ Key Features
+
+* **📦 Purchases & Sales Management:** Complete workflows for creating, tracking, and managing invoices.
+* **📄 Advanced PDF Export:** Generate highly customizable PDF invoices with full **Arabic (RTL)** font support using the `pdf` and `printing` packages.
+* **📱 Responsive Design:** Adaptive UI that transforms logically from a multi-column desktop view to a scrollable, touch-friendly mobile view.
+* **👥 Contact Management:** Dynamically filter and manage entities (Suppliers, Merchants, Customers).
+* **📈 Real-time Dashboard:** Track cash flow, inventory value, and daily statistics instantly.
+* **🔒 Secure Cloud Database:** Powered by **Supabase** (PostgreSQL) with strict Row Level Security (RLS) policies.
 
 ---
 
 ## 🏗️ Architecture & Tech Stack
-This project is built with a focus on **modularity** and **testability**, ensuring the business logic is decoupled from the UI.
 
-* **Framework:** [Flutter](https://flutter.dev) (Optimized for **Windows Desktop** & Android).
-* **State Management:** [BLoC / Cubit](https://pub.dev/packages/flutter_bloc) for predictable, localized state handling.
-* **Backend & Database:** 
-    * **Supabase (PostgreSQL):** Utilized as the primary relational cloud database to structuralize, query, and manage complex inventory and accounting data.
-    * **SharedPreferences:** Used for caching lightweight local configurations, user settings, and session flags.
-* **Dependency Injection:** [Injectable](https://pub.dev/packages/injectable) & [GetIt](https://pub.dev/packages/get_it) for decoupled service management and cleaner code.
-* **Business Logic:** Modularized using **Dart Mixins** to organize cross-cutting concerns (Sales, Purchases, Invoices).
-* **Updates:** [Shorebird](https://shorebird.dev) for Over-the-Air (OTA) patches to deliver instant fixes.
+This project strictly adheres to **Clean Architecture** principles, ensuring separation of concerns, scalability, and highly maintainable code.
 
----
+### Tech Stack:
+* **Framework:** Flutter
+* **State Management:** BLoC / Cubit
+* **Backend as a Service:** Supabase (Auth & PostgreSQL)
+* **Dependency Injection:** `get_it` & `injectable`
+* **Routing:** `go_router`
 
-## ✨ Technical Highlights
-* **Real-Time Synchronization:** Seamless data sync between Windows (Admin use) and Mobile clients powered by Supabase.
-* **Relational Data Integrity:** Designed structured PostgreSQL database tables with relational integrity to handle complex accounting transactions.
-* **Service-Oriented Design:** Logic is encapsulated in Singletons and Services to ensure a clean API integration layer.
-* **Luxury Minimalist UI:** A premium dashboard designed for high-density data management with a clean, professional aesthetic.
-* **Cross-Platform Consistency:** Unified codebase providing a native experience on Windows and Mobile.
+### Architectural Layers:
+1. **Domain Layer:** Contains core business rules, Entities (e.g., `PurchaseInvoiceEntity`), and abstract Repositories. Independent of any other layer.
+2. **Data Layer:** Implements repositories, contains Models (e.g., `PurchaseInvoiceModel`), and connects to Remote Data Sources (Supabase).
+3. **Presentation Layer:** Contains UI Widgets, Screens, and Cubits. UI components are heavily modularized (e.g., separated `ProductsSectionWidget`, `SummarySectionWidget`).
 
 ---
 
-## 📸 Project Preview
-*(Add your screenshots here to showcase the Luxury UI)*
+## 📸 Screenshots
+
+| Desktop Dashboard | Mobile Invoice Creation |
+| :---: | :---: |
+| <img src="link_to_dashboard_image.png" width="400" alt="Dashboard"> | <img src="link_to_mobile_image.png" width="200" alt="Mobile View"> |
+<!-- أضف روابط الصور الخاصة بك مكان link_to_... -->
+
+| Invoice History | PDF Arabic Export |
+| :---: | :---: |
+| <img src="link_to_history_image.png" width="400" alt="History"> | <img src="link_to_pdf_image.png" width="200" alt="PDF"> |
 
 ---
 
-## 🛠️ Installation & Setup (For Developers)
+## 🛠️ Getting Started (For Developers)
 
-1. **Clone the repo:**
+### Prerequisites
+* Flutter SDK (Latest Stable)
+* Dart SDK
+* Supabase Account & Project keys
+
+### Run the Project
+1. Clone the repository:
    ```bash
-   git clone [https://github.com/Mohamed-Kamal-1/life_plast.git](https://github.com/Mohamed-Kamal-1/life_plast.git)
+   git clone [https://github.com/yourusername/accounting-erp.git](https://github.com/yourusername/accounting-erp.git)
