@@ -6,14 +6,17 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'core/app_theme/app_theme.dart';
 import 'core/di/di.dart';
 import 'core/routes/app_router.dart';
+import 'core/services/desktop_updater.dart';
 import 'features/auth/presentation/cubit/auth_cubit.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  DesktopUpdater.checkAndUpdate();
   await Supabase.initialize(
-    url: 'https://qskkxcuylefaxlqgpsnh.supabase.co',
-    publishableKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFza2t4Y3V5bGVmYXhscWdwc25oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3NDI1NDEsImV4cCI6MjA5OTMxODU0MX0.SumZzcYLvTMQ2VlfDbjiIUoAZzDtfG8EEt5Ca9AGqtE',
-  );
+      // url: 'https://qwpfacmvoimxatyxwzsd.supabase.co',
+      // anonKey: 'sb_publishable_rYHeXeEBXY1wl-LJbOIjew_9OmuK0UH'
+      url: 'https://qskkxcuylefaxlqgpsnh.supabase.co',
+      publishableKey: 'sb_publishable_MJB1LPjSks55efzlOumz9g__6X_yuRx');
 
   configureDependencies();
 

@@ -2,6 +2,7 @@ import 'package:accounting_desktop/core/di/di.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../core/services/shorebird_updater.dart';
 import '../presentation/cubit/reports_cubit.dart';
 import '../presentation/cubit/reports_state.dart';
 import '../presentation/widgets/modern_stat_card.dart';
@@ -14,6 +15,14 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      AppUpdateService.checkForUpdates(context);
+    });
+  }
+
   DateTime _startDate = DateTime.now().subtract(const Duration(days: 30));
   DateTime _endDate = DateTime.now();
 
@@ -92,7 +101,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           runSpacing: 10,
                           children: [
                             const Text(
-                              'لوحة التحكم والسيولة',
+                              'لوحة التحكم و قط',
                               style: TextStyle(
                                 fontSize: 26,
                                 fontWeight: FontWeight.bold,
@@ -118,12 +127,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           ],
                         ),
                       ),
-
                       const SizedBox(height: 20),
-
-                      // ==========================================
-                      // 2. فلاتر البحث والتاريخ التفاعلية
-                      // ==========================================
                       Container(
                         width: double.infinity,
                         padding: const EdgeInsets.all(16),
@@ -146,24 +150,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             const Text('تصفية بالمدة:',
                                 style: TextStyle(
                                     fontWeight: FontWeight.bold, fontSize: 15)),
-
-                            // اختيار تاريخ البداية
                             DateInputWidget(
                               dateText: _formatDate(_startDate),
                               onTap: () => _selectDate(context, true),
                             ),
-
                             const Text('إلى:',
                                 style: TextStyle(
                                     fontWeight: FontWeight.bold, fontSize: 15)),
-
-                            // اختيار تاريخ النهاية
                             DateInputWidget(
                               dateText: _formatDate(_endDate),
                               onTap: () => _selectDate(context, false),
                             ),
-
-                            // زر عرض النتائج
                             ElevatedButton(
                               onPressed: () {
                                 context
@@ -182,8 +179,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                   style:
                                       TextStyle(fontWeight: FontWeight.bold)),
                             ),
-
-                            // زر شغل اليوم
                             OutlinedButton.icon(
                               onPressed: () => _setTodayFilter(context),
                               icon: const Icon(Icons.today, size: 18),
@@ -198,12 +193,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           ],
                         ),
                       ),
-
                       const SizedBox(height: 24),
-
-                      // ==========================================
-                      // 3. قسم الإحصائيات (الكروت) المربوط بالـ Cubit
-                      // ==========================================
                       BlocBuilder<ReportsCubit, ReportsState>(
                         builder: (context, state) {
                           if (state is ReportsLoading) {
@@ -266,12 +256,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           return const SizedBox.shrink();
                         },
                       ),
-
                       const SizedBox(height: 24),
-
-                      // ==========================================
-                      // 4. الجزء السفلي (تفاصيل حركة النقدية)
-                      // ==========================================
                       Container(
                         width: double.infinity,
                         padding: const EdgeInsets.all(20),
@@ -383,9 +368,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 }
 
-// ==========================================
-// DateInputWidget بعد دعم خاصية الضغط onTap
-// ==========================================
 class DateInputWidget extends StatelessWidget {
   final String dateText;
   final VoidCallback? onTap;
