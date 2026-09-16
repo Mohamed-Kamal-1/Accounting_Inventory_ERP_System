@@ -18,7 +18,7 @@ A modern, comprehensive, and fully responsive Accounting and ERP application bui
 Get the latest version of the application for your operating system:
 
 * 💻 **Windows:** https://bit.ly/3URiTKy
-* 📱 **Android:** https://bit.ly/4wXdHlH
+* 📱 **Android:** https://bit.ly/3UWtF2i
 
 
 
