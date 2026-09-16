@@ -51,20 +51,7 @@ This project strictly adheres to **Clean Architecture** principles, ensuring sep
 2. **Data Layer:** Implements repositories, contains Models (e.g., `PurchaseInvoiceModel`), and connects to Remote Data Sources (Supabase).
 3. **Presentation Layer:** Contains UI Widgets, Screens, and Cubits. UI components are heavily modularized (e.g., separated `ProductsSectionWidget`, `SummarySectionWidget`).
 
----
-
-## 📸 Screenshots
-
-| Desktop Dashboard | Mobile Invoice Creation |
-| :---: | :---: |
-| <img src="link_to_dashboard_image.png" width="400" alt="Dashboard"> | <img src="link_to_mobile_image.png" width="200" alt="Mobile View"> |
-<!-- أضف روابط الصور الخاصة بك مكان link_to_... -->
-
-| Invoice History | PDF Arabic Export |
-| :---: | :---: |
-| <img src="link_to_history_image.png" width="400" alt="History"> | <img src="link_to_pdf_image.png" width="200" alt="PDF"> |
-
----
+--- 
 
 ## 🛠️ Getting Started (For Developers)
 
