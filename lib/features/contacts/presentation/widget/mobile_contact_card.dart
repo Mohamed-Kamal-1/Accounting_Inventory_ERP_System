@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../domain/entities/contact_entity.dart';
+import '../bloc/contacts_bloc.dart';
 import 'contact_type_badge.dart';
 import 'contacts_table.dart';
 import 'edit_contact_dialog.dart';
@@ -82,10 +84,13 @@ class MobileContactCard extends StatelessWidget {
                       padding: const EdgeInsets.all(8),
                       constraints: const BoxConstraints(),
                       onPressed: () {
+                        final bloc = context.read<ContactsBloc>();
                         showDialog(
                             context: context,
-                            builder: (_) =>
-                                EditContactDialog(contact: contact));
+                            builder: (_) => BlocProvider.value(
+                                  value: bloc,
+                                  child: EditContactDialog(contact: contact),
+                                ));
                       }),
                   IconButton(
                       icon: const Icon(Icons.delete_outline_rounded,
@@ -93,10 +98,14 @@ class MobileContactCard extends StatelessWidget {
                       padding: const EdgeInsets.all(8),
                       constraints: const BoxConstraints(),
                       onPressed: () {
+                        final bloc = context.read<ContactsBloc>();
                         showDialog(
                             context: context,
-                            builder: (_) =>
-                                DeleteContactDialog(contactId: contact.id));
+                            builder: (_) => BlocProvider.value(
+                                  value: bloc,
+                                  child: DeleteContactDialog(
+                                      contactId: contact.id),
+                                ));
                       }),
                 ],
               )

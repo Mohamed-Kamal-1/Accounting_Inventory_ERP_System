@@ -34,7 +34,6 @@ class ContactsScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // 💡 ترويسة متجاوبة للموبايل
                   Wrap(
                     crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
@@ -52,10 +51,8 @@ class ContactsScreen extends StatelessWidget {
                     ],
                   ),
                   SizedBox(height: isMobile ? 16 : 24),
-
                   const AddContactForm(),
                   SizedBox(height: isMobile ? 16 : 24),
-
                   Container(
                     decoration: BoxDecoration(
                       color: Colors.white,
@@ -87,8 +84,6 @@ class ContactsScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 16),
-
-                  // الجدول المتجاوب
                   const Expanded(
                     child: ContactsTable(),
                   ),

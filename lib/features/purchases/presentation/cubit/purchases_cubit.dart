@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../../core/di/di.dart';
+import '../../../reports_and_dashboard/presentation/cubit/reports_cubit.dart';
 import '../../data/datasources/purchases_remote_datasource.dart';
 
 @injectable
@@ -107,7 +109,9 @@ class PurchasesCubit extends Cubit<PurchasesState> {
       emit(PurchasesError("الفاتورة فارغة، أضف منتجات"));
       return;
     }
-
+    if (getIt.isRegistered<ReportsCubit>()) {
+      getIt<ReportsCubit>().loadDashboardStats();
+    }
     emit(PurchasesLoading());
     try {
       final invoiceData = {
