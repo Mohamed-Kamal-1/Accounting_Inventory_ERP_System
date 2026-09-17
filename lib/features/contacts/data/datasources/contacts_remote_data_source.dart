@@ -71,7 +71,6 @@ class ContactsRemoteDataSourceImpl {
 
   Future<void> updateContact(ContactModel contact) async {
     try {
-      // نحن نعدل البيانات الأساسية فقط، ولا نعدل الرصيد الافتتاحي أو النوع لتجنب الكوارث المحاسبية
       await supabaseClient.from('contacts').update({
         'name': contact.name,
         'phone': contact.phone,
